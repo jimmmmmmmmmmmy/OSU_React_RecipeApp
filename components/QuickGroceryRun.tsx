@@ -1,111 +1,66 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
-import { FontFamily, FontSize, Color, Border } from "../GlobalStyles";
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import RecipeCard from './RecipeCard';
+import SectionHeader from './SectionHeader';
 
-const GroceryItem = ({ imageSource, title }) => (
-  <View style={styles.groceryItem}>
-    <Image
-      style={styles.groceryImage}
-      source={imageSource}
-      resizeMode="cover"
-    />
-    <Text style={styles.groceryTitle}>{title}</Text>
-  </View>
-);
+const recipeData = [
+  { id: '1', title: "Spaghetti and Meatballs", time: "30 Mins", creator: "Italian Chef", ingredients: ['spaghetti', 'meatballs', 'tomato sauce'], instructions: ['Cook spaghetti', 'Prepare meatballs', 'Mix with sauce'] },
+  { id: '2', title: "Shrimp Fried Rice", time: "1 Hour", creator: "Asian Cuisine Expert", ingredients: ['rice', 'shrimp', 'vegetables'], instructions: ['Cook rice', 'Stir-fry shrimp and veggies', 'Mix everything'] },
+  { id: '3', title: "Vegan Pancakes", time: "20 Mins", creator: "Vegan Chef", ingredients: ['flour', 'plant milk', 'maple syrup'], instructions: ['Mix batter', 'Cook pancakes', 'Serve with syrup'] },
+  { id: '4', title: "Chicken Stir Fry", time: "25 Mins", creator: "Quick Meal Pro", ingredients: ['chicken', 'mixed vegetables', 'soy sauce'], instructions: ['Cut chicken', 'Stir-fry everything', 'Add sauce'] },
+  { id: '5', title: "Vegetable Curry", time: "45 Mins", creator: "Indian Cuisine Master", ingredients: ['mixed vegetables', 'curry paste', 'coconut milk'], instructions: ['Prepare vegetables', 'Cook curry sauce', 'Simmer together'] },
+  { id: '6', title: "Beef Tacos", time: "35 Mins", creator: "Mexican Food Expert", ingredients: ['beef', 'taco shells', 'toppings'], instructions: ['Cook beef', 'Prepare toppings', 'Assemble tacos'] },
+];
 
 const QuickGroceryRun = () => {
-
   const navigation = useNavigation();
+
+  const handleSeeAll = () => {
+    navigation.navigate('RecipeCatalog', { source: 'QuickGroceryRun' });
+  };
+
+  const handleRecipePress = (recipe) => {
+    navigation.navigate('RecipeDetails', { recipe });
+  };
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Quick grocery run:</Text>
-        <TouchableOpacity 
-          style={styles.seeAllButton} 
-          onPress={() => navigation.navigate('RecipeCatalog', { source: 'QuickGroceryRun' })}
-          >
-          <Text style={styles.seeAllText}>See all</Text>
-          <Image
-            style={styles.arrowIcon}
-            source={require("../assets/iconarrowright.png")}
-          />
-        </TouchableOpacity>
-      </View>
+      <SectionHeader title="Quick grocery run:" onSeeAll={handleSeeAll} />
       <ScrollView 
         horizontal
         showsHorizontalScrollIndicator={false}
-        style={styles.groceryList}
+        contentContainerStyle={styles.cardsContainer}
       >
-        <GroceryItem 
-          imageSource={require("../assets/food-photo.png")} 
-          title="Indonesian beef burger"
-        />
-        <GroceryItem 
-          imageSource={require("../assets/food-photo.png")} 
-          title="Home made cute pancake"
-        />
-        <GroceryItem 
-          imageSource={require("../assets/food-photo.png")} 
-          title="How to make fried crab"
-        />
-        {/* Add more GroceryItem components as needed */}
+        {recipeData.map((recipe) => (
+          <RecipeCard
+            key={recipe.id}
+            imageSource={require("../assets/image-61.png")}
+            title={recipe.title}
+            time={recipe.time}
+            creator={recipe.creator}
+            style={styles.card}
+            onPress={() => handleRecipePress(recipe)}
+          />
+        ))}
       </ScrollView>
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
     marginTop: 20,
     paddingHorizontal: 20,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
+  cardsContainer: {
+    paddingHorizontal: 0,
   },
-  title: {
-    fontSize: FontSize.textStyleLargeTextBold_size,
-    fontWeight: "600",
-    fontFamily: FontFamily.textStyleSmallerTextRegular,
-    color: Color.neutral100,
-  },
-  seeAllButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  seeAllText: {
-    fontSize: FontSize.poppinsLabelBold_size,
-    fontWeight: "600",
-    fontFamily: FontFamily.textStyleSmallerTextRegular,
-    color: Color.colourStylesNeutralColourGray3,
-    marginRight: 5,
-  },
-  arrowIcon: {
-    width: 20,
-    height: 20,
-  },
-  groceryList: {
-    flexDirection: 'row',
-  },
-  groceryItem: {
-    width: 150,
-    marginRight: 15,
-  },
-  groceryImage: {
+  card: {
     width: 150,
     height: 150,
-    borderRadius: Border.br_3xs,
-    marginBottom: 5,
-  },
-  groceryTitle: {
-    fontSize: FontSize.poppinsLabelBold_size,
-    fontWeight: "600",
-    fontFamily: FontFamily.textStyleSmallerTextRegular,
-    color: Color.neutral100,
+    marginRight: 15,
   },
 });
 

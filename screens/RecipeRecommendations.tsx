@@ -67,10 +67,10 @@ const styles = StyleSheet.create({
     height: 24,
   },
   title: {
-    fontSize: FontSize.poppinsH4Bold_size,
-    fontWeight: "600",
-    fontFamily: FontFamily.textStyleSmallerTextRegular,
-    color: Color.neutral100,
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    flex: 1,
   },
   helpCircleIcon: {
     width: 24,

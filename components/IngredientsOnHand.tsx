@@ -16,31 +16,29 @@ const MealTypeTab = ({ title, isSelected, onPress }) => (
 const RecipeCard = ({ title, time }) => {
   const [isLiked, setIsLiked] = useState(false);
 
-  const toggleLike = () => {
-    setIsLiked(!isLiked);
-  };
-
   return (
     <View style={styles.recipeCard}>
       <View style={styles.imageContainer}>
         <Image 
-          source={require('../assets/food-photo.png')} 
+          source={require('../assets/image-61.png')} 
           style={styles.foodImage}
         />
       </View>
       <View style={styles.cardContent}>
-        <Text style={styles.recipeTitle}>{title}</Text>
+        <View style={styles.titleContainer}>
+          <Text style={styles.recipeTitle} numberOfLines={2}>{title}</Text>
+        </View>
         <View style={styles.timeContainer}>
           <Text style={styles.recipeTime}>{time}</Text>
           <TouchableOpacity 
             style={[styles.heartIconContainer, isLiked && styles.heartIconContainerLiked]} 
-            onPress={toggleLike}
+            onPress={() => setIsLiked(!isLiked)}
           >
             <Ionicons 
-          name="heart-outline" 
-          size={16} 
-          color={isLiked ? '#FFFFFF' : '#000000'} 
-        />
+              name={isLiked ? "heart" : "heart-outline"}
+              size={20} 
+              color={isLiked ? '#FFFFFF' : '#000000'} 
+            />
           </TouchableOpacity>
         </View>
       </View>
@@ -48,42 +46,52 @@ const RecipeCard = ({ title, time }) => {
   );
 };
 
+const SectionHeader = ({ title, onSeeAll }) => (
+  <View style={styles.header}>
+    <Text style={styles.sectionTitle}>{title}</Text>
+    <TouchableOpacity style={styles.seeAllButton} onPress={onSeeAll}>
+      <Text style={styles.seeAllText}>See all</Text>
+      <Image
+        style={styles.arrowIcon}
+        source={require("../assets/iconarrowright.png")}
+      />
+    </TouchableOpacity>
+  </View>
+);
+
 const IngredientsOnHand = () => {
-
   const navigation = useNavigation();
-
   const [selectedTab, setSelectedTab] = useState('Appetizer');
 
-  const handleTabPress = (tabName) => {
-    setSelectedTab(tabName);
-  };
+  const mealTypes = ['Appetizer', 'Breakfast', 'Lunch', 'Dinner'];
+  const recipes = [
+    { title: "Chopped Spring", time: "20 Mins" },
+    { title: "Grilled Salmon", time: "25 Mins" },
+    { title: "Vegetable Stir Fry", time: "15 Mins" },
+    { title: "Chicken Curry", time: "30 Mins" },
+    { title: "Pasta Primavera", time: "22 Mins" },
+  ];
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.sectionTitle}>Ingredients on hand:</Text>
-        <TouchableOpacity 
-          style={styles.seeAllButton} 
-          onPress={() => navigation.navigate('RecipeCatalog', { source: 'IngredientsOnHand'})}>
-          <Text style={styles.seeAllText}>See all</Text>
-          <Image
-            style={styles.arrowIcon}
-            source={require("../assets/iconarrowright.png")}
-          />
-        </TouchableOpacity>
-      </View>
+      <SectionHeader 
+        title="Ingredients on hand:" 
+        onSeeAll={() => navigation.navigate('RecipeCatalog', { source: 'IngredientsOnHand' })}
+      />
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabContainer}>
-        <MealTypeTab title="Appetizer" isSelected={selectedTab === 'Appetizer'} onPress={handleTabPress} />
-        <MealTypeTab title="Breakfast" isSelected={selectedTab === 'Breakfast'} onPress={handleTabPress} />
-        <MealTypeTab title="Lunch" isSelected={selectedTab === 'Lunch'} onPress={handleTabPress} />
-        <MealTypeTab title="Dinner" isSelected={selectedTab === 'Dinner'} onPress={handleTabPress} />
+        {mealTypes.map((type) => (
+          <MealTypeTab 
+            key={type}
+            title={type} 
+            isSelected={selectedTab === type} 
+            onPress={setSelectedTab} 
+          />
+        ))}
       </ScrollView>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.recipeContainer}>
-        <RecipeCard title="Chopped Spring" time="20 Mins" />
-        <RecipeCard title="Chopped Spring" time="20 Mins" />
-        <RecipeCard title="Chopped Spring" time="20 Mins" />
-        <RecipeCard title="Chopped Spring" time="20 Mins" />
-        <RecipeCard title="Chopped Spring" time="20 Mins" />
+        {recipes.map((recipe, index) => (
+          <RecipeCard key={index} title={recipe.title} time={recipe.time} />
+        ))}
       </ScrollView>
     </View>
   );
@@ -145,88 +153,76 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   recipeCard: {
-    width: 150,
+    width: 180, // Increased width
     marginRight: 15,
     alignItems: 'center',
   },
   imageContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 55,
+    width: 140, // Larger circular image
+    height: 140,
+    borderRadius: 70,
     backgroundColor: 'white',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: -20,
+    marginBottom: -50, // Increased overlap
     zIndex: 1,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
   },
   foodImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+  },
+  titleContainer: {
+    height: 50, // Fixed height for title area
+    justifyContent: 'center',
   },
   cardContent: {
     backgroundColor: '#F0F0F0',
-    borderRadius: 8,
+    borderRadius: 12,
     width: '100%',
-    paddingTop: 30,
-    paddingBottom: 15,
-    paddingHorizontal: 10,
+    paddingTop: 60,
+    paddingBottom: 20,
+    paddingHorizontal: 15,
     alignItems: 'center',
-  },
+    height: 180, // Fixed height for the card content
+    justifyContent: 'space-between', // Distribute space evenly
+  },  
   recipeTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
     textAlign: 'center',
-    marginBottom: 10,
   },
   timeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
-    marginTop: 10,
   },
   recipeTime: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '600',
     color: '#757575',
   },
-
-  
   heartIconContainer: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     backgroundColor: 'white',
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.20,
     shadowRadius: 1.41,
     elevation: 2,
   },
   heartIconContainerLiked: {
     backgroundColor: '#FF0000',
-  },
-  heartIcon: {
-    width: 16,
-    height: 16,
-    tintColor: '#000000',
-  },
-  heartIconLiked: {
-    tintColor: '#FFFFFF',
   },
 });
 

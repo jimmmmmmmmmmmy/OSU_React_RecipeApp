@@ -11,6 +11,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 
 
+
 const RecipeCatalog = () => {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
   const route = useRoute();
@@ -49,7 +50,7 @@ const RecipeCatalog = () => {
             source={require("../assets/vuesaxlineararrowleft2.png")}
           />
         </TouchableOpacity>
-        <Text style={styles.title}>Search recipes</Text>
+        <Text style={styles.title}>Recipe Catallog</Text>
         <TouchableOpacity onPress={() => {navigation.navigate("SupportPage", { source: 'RecipeCatalog'})}}>
           <Image
             style={styles.icon}
@@ -61,7 +62,9 @@ const RecipeCatalog = () => {
   
       <View style={styles.searchContainer}>
         <View style={styles.searchFieldWrapper}>
-          <SearchField placeholder="Search recipe" style={styles.searchField} />
+          <SearchField 
+            placeholder="Search recipe" 
+            style={styles.searchField} />
         </View>
         <TouchableOpacity
           style={styles.filterButton}
@@ -112,10 +115,10 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   title: {
-    fontSize: FontSize.textStyleMediumTextBold_size,
-    fontFamily: FontFamily.textStyleSmallerTextRegular,
-    fontWeight: "600",
-    color: Color.neutral100,
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    flex: 1,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -127,9 +130,10 @@ const styles = StyleSheet.create({
     width: '85%', // Adjust this value as needed
   },
   searchField: {
-    // Any specific styles for the SearchField component
+    //
   },
   filterButton: {
+    marginTop: 0, // filterButton needs to match searchField
     padding: 10,
     marginLeft: 10,
   },
@@ -141,13 +145,14 @@ const styles = StyleSheet.create({
     flex: 1, // This allows ScrollableRecipeList to take up the remaining space
   },
   sourceText: {
-    fontSize: FontSize.textStyleLargeTextBold_size,
+    fontSize: 24,
     fontFamily: FontFamily.textStyleSmallerTextRegular,
-    fontWeight: "600",
+    fontWeight: '600',
     color: Color.neutral100,
-    marginBottom: 10,
+    textAlign: 'left',
     paddingHorizontal: 20,
-  },
+    marginBottom: 0,
+  } as TextStyle,
   fadedEdge: {
     position: 'absolute',
     top: 0,

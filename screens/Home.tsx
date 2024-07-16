@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   recipeRecommendsContainer: {
-    marginBottom: 10,
+    marginBottom: 5,
   },
   ingredientsContainer: {
     flex: 1, // This allows MyIngredients to take up the remaining space

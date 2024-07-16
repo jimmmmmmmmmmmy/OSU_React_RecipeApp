@@ -1,65 +1,83 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
-import { LinearGradient } from "expo-linear-gradient";
+import { View, StyleSheet, FlatList, TouchableOpacity, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Color, FontFamily, FontSize, Border } from "../GlobalStyles";
+import RecipeCard from './RecipeCard';
+import { Border, Color } from "../GlobalStyles";
+import { useNavigation } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
+const cardWidth = width - 40; // Full width minus padding
 
-const RecipeCard = ({ title, creator }) => {
-  const [isLiked, setIsLiked] = useState(false);
+// Placeholder recipe data
+const recipesData = [
+  { id: '1', title: 'Delicious Pasta', creator: 'Chef John', ingredients: ['pasta', 'tomato sauce', 'cheese'], instructions: ['Boil pasta', 'Add sauce', 'Sprinkle cheese'] },
+  { id: '2', title: 'Grilled Chicken Salad', creator: 'Emma\'s Kitchen', ingredients: ['chicken', 'lettuce', 'tomatoes'], instructions: ['Grill chicken', 'Chop vegetables', 'Mix and serve'] },
+  // ... add more recipes as needed
+];
 
-  const toggleLike = () => {
-    setIsLiked(!isLiked);
+const ScrollableRecipeList = ({ recipes }) => {
+  const [likedRecipes, setLikedRecipes] = useState<Set<number>>(new Set());
+
+  const navigation = useNavigation();
+
+  const toggleLike = (index: number) => {
+    setLikedRecipes(prevLiked => {
+      const newLiked = new Set(prevLiked);
+      if (newLiked.has(index)) {
+        newLiked.delete(index);
+      } else {
+        newLiked.add(index);
+      }
+      return newLiked;
+    });
   };
 
-  return (
-    <View style={styles.card}>
-      <LinearGradient
-        style={styles.cardGradient}
-        locations={[0, 1]}
-        colors={["rgba(0, 0, 0, 0)", "#000"]}
+  const handleRecipePress = (recipe) => {
+    navigation.navigate('RecipeDetails', { recipe });
+  };
+
+  const renderItem = ({ item, index }) => (
+    <View style={styles.cardWrapper}>
+      <RecipeCard 
+        imageSource={item.imageSource || require("../assets/image-61.png")}
+        title={item.title}
+        creator={`by ${item.creator}`}
+        style={styles.card}
+        onPress={() => handleRecipePress(item)}
       />
-      <Text style={styles.foodTitle} numberOfLines={2}>
-        {title}
-      </Text>
-      <Text style={styles.creator}>{creator}</Text>
       <TouchableOpacity 
-        style={[styles.heartIconContainer, isLiked && styles.heartIconContainerLiked]} 
-        onPress={toggleLike}
+        style={[
+          styles.heartIconContainer, 
+          likedRecipes.has(index) && styles.heartIconContainerLiked
+        ]} 
+        onPress={() => toggleLike(index)}
       >
         <Ionicons 
-          name="heart-outline" 
+          name={likedRecipes.has(index) ? "heart" : "heart-outline"}
           size={16} 
-          color={isLiked ? '#FFFFFF' : '#000000'} 
+          color={likedRecipes.has(index) ? '#FFFFFF' : '#000000'} 
         />
       </TouchableOpacity>
     </View>
   );
-};
 
-const ScrollableRecipeList = ({ recipes }) => {
   return (
-    <ScrollView style={styles.scrollView}>
-      <View style={styles.cardsContainer}>
-        {recipes.map((recipe, index) => (
-          <RecipeCard 
-            key={index} 
-            title={recipe.title} 
-            creator={recipe.creator} 
-          />
-        ))}
-      </View>
-    </ScrollView>
+    <FlatList
+      data={recipes}
+      renderItem={renderItem}
+      keyExtractor={(item, index) => index.toString()}
+      contentContainerStyle={styles.listContainer}
+    />
   );
 };
 
 const styles = StyleSheet.create({
-  scrollView: {
-    flex: 1,
-  },
-  cardsContainer: {
+  listContainer: {
     padding: 20,
+  },
+  cardWrapper: {
+    position: 'relative',
+    marginBottom: 0,
   },
   card: {
     height: 200,
@@ -67,34 +85,13 @@ const styles = StyleSheet.create({
     borderRadius: Border.br_3xs,
     overflow: 'hidden',
   },
-  cardGradient: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  foodTitle: {
-    position: 'absolute',
-    bottom: 40,
-    left: 10,
-    right: 10,
-    color: Color.white,
-    fontSize: FontSize.textStyleSmallerTextRegular_size,
-    fontFamily: FontFamily.textStyleSmallerTextRegular,
-    fontWeight: "600",
-  },
-  creator: {
-    position: 'absolute',
-    bottom: 10,
-    left: 10,
-    color: Color.colourStylesNeutralColourGray3,
-    fontSize: FontSize.textStyleSmallerTextSmallLabel_size,
-    fontFamily: FontFamily.textStyleSmallerTextRegular,
-  },
   heartIconContainer: {
     position: 'absolute',
     top: 10,
     right: 10,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: 'white',
     justifyContent: 'center',
     alignItems: 'center',
@@ -108,7 +105,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   heartIconContainerLiked: {
-    backgroundColor: '#FF0000',
+    backgroundColor: Color.colorRed || '#FF0000',
   },
 });
 
