@@ -1,40 +1,78 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FontFamily, FontSize, Color, Border } from "../GlobalStyles";
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import ingredientsData from '../data/ingredientsData.json';
 
-const IngredientItem = ({ label, name, icon }) => (
-  <View style={styles.ingredientItem}>
+const IngredientItem = ({ name, quantity, unit, emoji, inStock, onPress }) => (
+  <TouchableOpacity onPress={onPress} style={[styles.ingredientItem, inStock && styles.inStockItem]}>
     <View style={styles.bg} />
-    <Text style={styles.label}>{label}</Text>
+    <Text style={styles.label}>
+      {quantity ? `${quantity} ${unit}` : (inStock ? 'In Stock' : 'Out of Stock')}
+    </Text>
     <View style={styles.iconNoodles}>
       <View style={styles.bg1} />
-      {icon && <Text style={styles.text}>{icon}</Text>}
+      <Text style={styles.text}>{emoji}</Text>
     </View>
     <Text style={styles.ingredientName}>{name}</Text>
-  </View>
+  </TouchableOpacity>
 );
 
 const MyIngredients = () => {
-  const ingredients = [
-    { label: "2 lbs", name: "Smoked Salmon" },
-    { label: "200g", name: "Carrots" },
-    { label: "200g", name: "Udon Noodles" },
-    { label: "200g", name: "Red sushi" },
-    { label: "200g", name: "Food Ingredient"},
-    { label: "200g", name: "Food Ingredient"},
-    { label: "200g", name: "Food Ingredient"},
-    { label: "200g", name: "Food Ingredient"},
-    { label: "200g", name: "Food Ingredient"},
-  ];
+  const navigation = useNavigation();
+  const [userIngredients, setUserIngredients] = useState({ fridge: [], pantry: [] });
+
+  const loadUserIngredients = useCallback(async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem('userIngredients');
+      if (jsonValue != null) {
+        setUserIngredients(JSON.parse(jsonValue));
+      }
+    } catch (e) {
+      console.error('Failed to load user ingredients:', e);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadUserIngredients();
+  }, [loadUserIngredients]);
+
+  const handleIngredientPress = () => {
+    navigation.navigate('IngredientsList');
+  };
+
+  const renderIngredients = (storageType) => {
+    return userIngredients[storageType].map(userIngredient => {
+      const ingredientData = ingredientsData.find(i => i.id === userIngredient.id);
+      if (!ingredientData) return null;
+      return (
+        <IngredientItem
+          key={userIngredient.id}
+          name={ingredientData.name}
+          quantity={userIngredient.quantity}
+          unit={userIngredient.unit || ingredientData.defaultUnit}
+          emoji={ingredientData.emoji}
+          inStock={userIngredient.inStock !== undefined ? userIngredient.inStock : true}
+          onPress={handleIngredientPress}
+        />
+      );
+    });
+  };
+
+  const totalItems = userIngredients.fridge.length + userIngredients.pantry.length;
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>My Ingredients:</Text>
-        <View style={styles.servings}>
-          <Text style={styles.itemCount}>{ingredients.length} items</Text>
-        </View>
+        <TouchableOpacity
+          onPress={handleIngredientPress}
+          style={styles.itemCount}
+        >
+          <Text style={styles.itemCount}>{totalItems} items</Text>
+        </TouchableOpacity>
       </View>
       <View style={styles.listContainer}>
         <ScrollView 
@@ -42,9 +80,8 @@ const MyIngredients = () => {
           contentContainerStyle={styles.scrollViewContent}
           showsVerticalScrollIndicator={false}
         >
-          {ingredients.map((ingredient, index) => (
-            <IngredientItem key={index} {...ingredient} />
-          ))}
+          {renderIngredients('fridge')}
+          {renderIngredients('pantry')}
         </ScrollView>
         <LinearGradient
           colors={['rgba(255,255,255,1)', 'rgba(255,255,255,0)']}
@@ -59,6 +96,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
+  },
+  sectionTitle: {
+    fontSize: FontSize.textStyleMediumTextBold_size,
+    fontWeight: "600",
+    color: Color.neutral100,
+    marginTop: 20,
+    marginBottom: 10,
   },
   header: {
     flexDirection: 'row',
@@ -103,9 +147,13 @@ const styles = StyleSheet.create({
     height: 76,
     marginBottom: 12,
   },
+  inStockItem: {
+    opacity: 90,
+    backgroundColor: Color.white,
+    
+  },
   bg: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: Color.colourStylesNeutralColourGray3,
     borderRadius: Border.br_3xs,
   },
   label: {
@@ -114,7 +162,7 @@ const styles = StyleSheet.create({
     right: 16,
     fontSize: FontSize.poppinsLabelBold_size,
     lineHeight: 20,
-    color: Color.neutral10,
+    color: Color.black,
     textAlign: 'right',
     fontFamily: FontFamily.textStyleSmallerTextRegular,
   },
@@ -135,7 +183,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: FontSize.size_9xl,
     lineHeight: 32,
-    color: Color.white,
+    color: Color.black,
     textAlign: 'center',
     fontFamily: FontFamily.textStyleSmallerTextRegular,
   },
@@ -145,7 +193,7 @@ const styles = StyleSheet.create({
     left: 84,
     fontSize: FontSize.textStyleNormalTextBold_size,
     lineHeight: 22,
-    color: Color.white,
+    color: Color.black,
     fontWeight: "600",
     fontFamily: FontFamily.textStyleSmallerTextRegular,
   },

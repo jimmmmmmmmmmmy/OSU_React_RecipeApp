@@ -27,6 +27,7 @@ export const Color = {
   white: "#fff",
   outline: "#d0dbea",
   colorCadetblue: "#71b1a1",
+  lightGreen: '#90EE90',
   primary: "#1fcc79",
   primary50: "#e23e3e",
   colourStylesNeutralColourGray1: "#484848",

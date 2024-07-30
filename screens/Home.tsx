@@ -7,8 +7,18 @@ import RecipeRecommends from "../components/RecipeRecommends";
 import MyIngredients from "../components/MyIngredients";
 import { FontFamily, FontSize, Color } from "../GlobalStyles";
 import { TouchableOpacity } from "react-native-gesture-handler";
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 const Home = ({ navigation }) => {
+  const [refreshKey, setRefreshKey] = React.useState(0);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      // This will cause MyIngredients to re-render when the Home screen comes into focus
+      setRefreshKey(prevKey => prevKey + 1);
+    }, [])
+  );
+
   const SupportNav = () => {
     navigation.navigate("SupportPage", { source: 'Home'})
   };
@@ -32,7 +42,7 @@ const Home = ({ navigation }) => {
         <RecipeRecommends />
       </View>
       <View style={styles.ingredientsContainer}>
-        <MyIngredients />
+        <MyIngredients key={refreshKey} />
       </View>
     </SafeAreaView>
   );

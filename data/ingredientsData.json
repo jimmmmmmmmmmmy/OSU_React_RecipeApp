@@ -1,0 +1,389 @@
+[
+    {
+      "id": "spaghetti",
+      "name": "Spaghetti",
+      "defaultUnit": "lb",
+      "category": "Pasta",
+      "emoji": "🍝",
+      "iconName": "spaghetti",
+      "storageType": "pantry"
+    },
+    {
+      "id": "ground_beef",
+      "name": "Ground Beef",
+      "defaultUnit": "lb",
+      "category": "Meat",
+      "emoji": "🥩",
+      "iconName": "ground_beef",
+      "storageType": "fridge"
+    },
+    {
+      "id": "breadcrumbs",
+      "name": "Breadcrumbs",
+      "defaultUnit": "cup",
+      "category": "Baking",
+      "emoji": "🍞",
+      "iconName": "breadcrumbs",
+      "storageType": "pantry"
+    },
+    {
+      "id": "egg",
+      "name": "Egg",
+      "defaultUnit": "piece",
+      "category": "Dairy",
+      "emoji": "🥚",
+      "iconName": "egg",
+      "storageType": "fridge"
+    },
+    {
+      "id": "garlic",
+      "name": "Garlic",
+      "defaultUnit": "clove",
+      "category": "Vegetable",
+      "emoji": "🧄",
+      "iconName": "garlic",
+      "storageType": "pantry"
+    },
+    {
+      "id": "tomato_sauce",
+      "name": "Tomato Sauce",
+      "defaultUnit": "can",
+      "category": "Canned Goods",
+      "emoji": "🥫",
+      "iconName": "tomato_sauce",
+      "storageType": "pantry"
+    },
+    {
+      "id": "oregano",
+      "name": "Oregano",
+      "defaultUnit": "tsp",
+      "category": "Spices",
+      "emoji": "🌿",
+      "iconName": "oregano",
+      "storageType": "pantry"
+    },
+    {
+      "id": "salt",
+      "name": "Salt",
+      "defaultUnit": "to taste",
+      "category": "Spices",
+      "emoji": "🧂",
+      "iconName": "salt",
+      "storageType": "pantry"
+    },
+    {
+      "id": "pepper",
+      "name": "Pepper",
+      "defaultUnit": "to taste",
+      "category": "Spices",
+      "emoji": "🧂",
+      "iconName": "pepper",
+      "storageType": "pantry"
+    },
+    {
+      "id": "whole_grain_bread",
+      "name": "Whole Grain Bread",
+      "defaultUnit": "slice",
+      "category": "Bakery",
+      "emoji": "🍞",
+      "iconName": "whole_grain_bread",
+      "storageType": "pantry"
+    },
+    {
+      "id": "avocado",
+      "name": "Avocado",
+      "defaultUnit": "piece",
+      "category": "Fruit",
+      "emoji": "🥑",
+      "iconName": "avocado",
+      "storageType": "fridge"
+    },
+    {
+      "id": "red_pepper_flakes",
+      "name": "Red Pepper Flakes",
+      "defaultUnit": "to taste",
+      "category": "Spices",
+      "emoji": "🌶️",
+      "iconName": "red_pepper_flakes",
+      "storageType": "pantry"
+    },
+    {
+      "id": "chicken_breast",
+      "name": "Chicken Breast",
+      "defaultUnit": "piece",
+      "category": "Meat",
+      "emoji": "🍗",
+      "iconName": "chicken_breast",
+      "storageType": "fridge"
+    },
+    {
+      "id": "bell_pepper",
+      "name": "Bell Pepper",
+      "defaultUnit": "piece",
+      "category": "Vegetable",
+      "emoji": "🫑",
+      "iconName": "bell_pepper",
+      "storageType": "fridge"
+    },
+    {
+      "id": "broccoli",
+      "name": "Broccoli",
+      "defaultUnit": "cup",
+      "category": "Vegetable",
+      "emoji": "🥦",
+      "iconName": "broccoli",
+      "storageType": "fridge"
+    },
+    {
+      "id": "carrot",
+      "name": "Carrot",
+      "defaultUnit": "piece",
+      "category": "Vegetable",
+      "emoji": "🥕",
+      "iconName": "carrot",
+      "storageType": "fridge"
+    },
+    {
+      "id": "soy_sauce",
+      "name": "Soy Sauce",
+      "defaultUnit": "tbsp",
+      "category": "Condiments",
+      "emoji": "🍶",
+      "iconName": "soy_sauce",
+      "storageType": "fridge"
+    },
+    {
+      "id": "vegetable_oil",
+      "name": "Vegetable Oil",
+      "defaultUnit": "tbsp",
+      "category": "Oil",
+      "emoji": "🫙",
+      "iconName": "vegetable_oil",
+      "storageType": "pantry"
+    },
+    {
+      "id": "sesame_oil",
+      "name": "Sesame Oil",
+      "defaultUnit": "tsp",
+      "category": "Oil",
+      "emoji": "🫙",
+      "iconName": "sesame_oil",
+      "storageType": "pantry"
+    },
+    {
+      "id": "baguette",
+      "name": "Baguette",
+      "defaultUnit": "piece",
+      "category": "Bakery",
+      "emoji": "🥖",
+      "iconName": "baguette",
+      "storageType": "pantry"
+    },
+    {
+      "id": "tomato",
+      "name": "Tomato",
+      "defaultUnit": "piece",
+      "category": "Vegetable",
+      "emoji": "🍅",
+      "iconName": "tomato",
+      "storageType": "fridge"
+    },
+    {
+      "id": "basil",
+      "name": "Basil",
+      "defaultUnit": "cup",
+      "category": "Herb",
+      "emoji": "🌿",
+      "iconName": "basil",
+      "storageType": "fridge"
+    },
+    {
+      "id": "olive_oil",
+      "name": "Olive Oil",
+      "defaultUnit": "tbsp",
+      "category": "Oil",
+      "emoji": "🫙",
+      "iconName": "olive_oil",
+      "storageType": "pantry"
+    },
+    {
+      "id": "balsamic_vinegar",
+      "name": "Balsamic Vinegar",
+      "defaultUnit": "tbsp",
+      "category": "Condiments",
+      "emoji": "🍶",
+      "iconName": "balsamic_vinegar",
+      "storageType": "pantry"
+    },
+    {
+      "id": "spinach",
+      "name": "Spinach",
+      "defaultUnit": "oz",
+      "category": "Vegetable",
+      "emoji": "🥬",
+      "iconName": "spinach",
+      "storageType": "fridge"
+    },
+    {
+      "id": "artichoke_hearts",
+      "name": "Artichoke Hearts",
+      "defaultUnit": "oz",
+      "category": "Vegetable",
+      "emoji": "🫚",
+      "iconName": "artichoke_hearts",
+      "storageType": "pantry"
+    },
+    {
+      "id": "cream_cheese",
+      "name": "Cream Cheese",
+      "defaultUnit": "oz",
+      "category": "Dairy",
+      "emoji": "🧀",
+      "iconName": "cream_cheese",
+      "storageType": "fridge"
+    },
+    {
+      "id": "sour_cream",
+      "name": "Sour Cream",
+      "defaultUnit": "cup",
+      "category": "Dairy",
+      "emoji": "🥛",
+      "iconName": "sour_cream",
+      "storageType": "fridge"
+    },
+    {
+      "id": "mayonnaise",
+      "name": "Mayonnaise",
+      "defaultUnit": "cup",
+      "category": "Condiments",
+      "emoji": "🥚",
+      "iconName": "mayonnaise",
+      "storageType": "fridge"
+    },
+    {
+      "id": "parmesan_cheese",
+      "name": "Parmesan Cheese",
+      "defaultUnit": "cup",
+      "category": "Dairy",
+      "emoji": "🧀",
+      "iconName": "parmesan_cheese",
+      "storageType": "fridge"
+    },
+    {
+      "id": "tortilla",
+      "name": "Tortilla",
+      "defaultUnit": "piece",
+      "category": "Bakery",
+      "emoji": "🫓",
+      "iconName": "tortilla",
+      "storageType": "pantry"
+    },
+    {
+      "id": "bacon",
+      "name": "Bacon",
+      "defaultUnit": "slice",
+      "category": "Meat",
+      "emoji": "🥓",
+      "iconName": "bacon",
+      "storageType": "fridge"
+    },
+    {
+      "id": "cheddar_cheese",
+      "name": "Cheddar Cheese",
+      "defaultUnit": "cup",
+      "category": "Dairy",
+      "emoji": "🧀",
+      "iconName": "cheddar_cheese",
+      "storageType": "fridge"
+    },
+    {
+      "id": "onion",
+      "name": "Onion",
+      "defaultUnit": "piece",
+      "category": "Vegetable",
+      "emoji": "🧅",
+      "iconName": "onion",
+      "storageType": "pantry"
+    },
+    {
+      "id": "romaine_lettuce",
+      "name": "Romaine Lettuce",
+      "defaultUnit": "head",
+      "category": "Vegetable",
+      "emoji": "🥬",
+      "iconName": "romaine_lettuce",
+      "storageType": "fridge"
+    },
+    {
+      "id": "croutons",
+      "name": "Croutons",
+      "defaultUnit": "cup",
+      "category": "Bakery",
+      "emoji": "🍞",
+      "iconName": "croutons",
+      "storageType": "pantry"
+    },
+    {
+      "id": "caesar_dressing",
+      "name": "Caesar Dressing",
+      "defaultUnit": "cup",
+      "category": "Condiments",
+      "emoji": "🥗",
+      "iconName": "caesar_dressing",
+      "storageType": "fridge"
+    },
+    {
+      "id": "lemon_juice",
+      "name": "Lemon Juice",
+      "defaultUnit": "tbsp",
+      "category": "Condiments",
+      "emoji": "🍋",
+      "iconName": "lemon_juice",
+      "storageType": "fridge"
+    },
+    {
+      "id": "black_pepper",
+      "name": "Black Pepper",
+      "defaultUnit": "to taste",
+      "category": "Spices",
+      "emoji": "🧂",
+      "iconName": "black_pepper",
+      "storageType": "pantry"
+    },
+    {
+      "id": "burger_bun",
+      "name": "Burger Bun",
+      "defaultUnit": "piece",
+      "category": "Bakery",
+      "emoji": "🍔",
+      "iconName": "burger_bun",
+      "storageType": "pantry"
+    },
+    {
+      "id": "lettuce",
+      "name": "Lettuce",
+      "defaultUnit": "leaf",
+      "category": "Vegetable",
+      "emoji": "🥬",
+      "iconName": "lettuce",
+      "storageType": "fridge"
+    },
+    {
+      "id": "red_onion",
+      "name": "Red Onion",
+      "defaultUnit": "piece",
+      "category": "Vegetable",
+      "emoji": "🧅",
+      "iconName": "red_onion",
+      "storageType": "pantry"
+    },
+    {
+      "id": "mustard",
+      "name": "Mustard",
+      "defaultUnit": "tbsp",
+      "category": "Condiments",
+      "emoji": "🌭",
+      "iconName": "mustard",
+      "storageType": "fridge"
+    }
+  ]

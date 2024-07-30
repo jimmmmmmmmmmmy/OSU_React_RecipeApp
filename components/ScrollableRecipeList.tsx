@@ -4,16 +4,11 @@ import { Ionicons } from '@expo/vector-icons';
 import RecipeCard from './RecipeCard';
 import { Border, Color } from "../GlobalStyles";
 import { useNavigation } from '@react-navigation/native';
+import recipeData from '../data/recipeData.json';
+import images from '../data/images';
 
 const { width } = Dimensions.get('window');
 const cardWidth = width - 40; // Full width minus padding
-
-// Placeholder recipe data
-const recipesData = [
-  { id: '1', title: 'Delicious Pasta', creator: 'Chef John', ingredients: ['pasta', 'tomato sauce', 'cheese'], instructions: ['Boil pasta', 'Add sauce', 'Sprinkle cheese'] },
-  { id: '2', title: 'Grilled Chicken Salad', creator: 'Emma\'s Kitchen', ingredients: ['chicken', 'lettuce', 'tomatoes'], instructions: ['Grill chicken', 'Chop vegetables', 'Mix and serve'] },
-  // ... add more recipes as needed
-];
 
 const ScrollableRecipeList = ({ recipes }) => {
   const [likedRecipes, setLikedRecipes] = useState<Set<number>>(new Set());
@@ -36,10 +31,15 @@ const ScrollableRecipeList = ({ recipes }) => {
     navigation.navigate('RecipeDetails', { recipe });
   };
 
+  const getImageSource = (imagePath) => {
+    const imageName = imagePath.split('/').pop().split('.')[0];
+    return images[imageName];
+  };
+
   const renderItem = ({ item, index }) => (
     <View style={styles.cardWrapper}>
       <RecipeCard 
-        imageSource={item.imageSource || require("../assets/image-61.png")}
+        imageSource={getImageSource(item.imageSource)}
         title={item.title}
         creator={`by ${item.creator}`}
         style={styles.card}

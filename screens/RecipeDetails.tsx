@@ -1,31 +1,40 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, ViewStyle, TextStyle, ImageStyle } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
 import { RouteProp } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from "expo-linear-gradient";
 import { Color, FontFamily, FontSize, Border } from "../GlobalStyles";
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import images from '../data/images';
+import ingredientsData from '../data/ingredientsData.json';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+type Ingredient = {
+  id: string;
+  amount: number;
+  unit: string;
+};
 
 type Recipe = {
   id: string;
   title: string;
   creator: string;
   time: string;
-  category?: string;
+  category?: string[];
   likes?: number;
   description?: string;
-  ingredients: string[];
+  ingredients: Ingredient[];
   instructions: string[];
-  imageSource?: any;
+  imageSource?: string;
 };
 
-type RecipeDetailsRouteProp = RouteProp<
-  {
-    RecipeDetails: {
-      recipe: Recipe;
-    };
-  },
-  'RecipeDetails'
->;
+type RootStackParamList = {
+  RecipeDetails: { recipe: Recipe };
+};
+
+type RecipeDetailsRouteProp = RouteProp<RootStackParamList, 'RecipeDetails'>;
 
 type Props = {
   route: RecipeDetailsRouteProp;
@@ -33,117 +42,168 @@ type Props = {
 
 const RecipeDetails: React.FC<Props> = ({ route }) => {
   const { recipe } = route.params;
+  const navigation = useNavigation();
+  const [userIngredients, setUserIngredients] = useState({ fridge: [], pantry: [] });
+
+  useEffect(() => {
+    loadUserIngredients();
+  }, []);
+
+  const loadUserIngredients = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem('userIngredients');
+      if (jsonValue != null) {
+        setUserIngredients(JSON.parse(jsonValue));
+      }
+    } catch (e) {
+      console.error('Failed to load user ingredients:', e);
+    }
+  };
+
+  const getImageSource = (imagePath: string) => {
+    const imageName = imagePath.split('/').pop()?.split('.')[0];
+    return imageName ? images[imageName] : null;
+  };
+
+  const getIngredientName = (id: string) => {
+    const ingredient = ingredientsData.find(i => i.id === id);
+    return ingredient ? ingredient.name : id;
+  };
+
+  const isIngredientAvailable = (ingredientId: string): boolean => {
+    return userIngredients.fridge.some(item => item.id === ingredientId) ||
+           userIngredients.pantry.some(item => item.id === ingredientId && item.inStock);
+  };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.imageContainer}>
-        <Image
-          source={recipe.imageSource || require("../assets/image-61.png")}
-          style={styles.image}
-        />
-        <LinearGradient
-          style={styles.gradient}
-          colors={["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0.8)"]}
-        />
-        <Text style={styles.title}>{recipe.title}</Text>
-      </View>
-
-      <View style={styles.infoContainer}>
-        <View style={styles.infoItem}>
-          <Ionicons name="time-outline" size={24} color={Color.e5481} />
-          <Text style={styles.infoText}>{recipe.time}</Text>
-        </View>
-        {recipe.category && (
-          <View style={styles.infoItem}>
-            <Ionicons name="restaurant-outline" size={24} color={Color.e5481} />
-            <Text style={styles.infoText}>{recipe.category}</Text>
+    <SafeAreaView style={styles.container} edges={['left', 'right']}>
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollViewContent}
+      >
+        <View style={styles.imageContainer}>
+          <Image
+            source={getImageSource(recipe.imageSource)}
+            style={styles.image}
+          />
+          <LinearGradient
+            style={styles.gradient}
+            colors={["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0.8)"]}
+          />
+          <View style={styles.headerButtons}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
+              <Ionicons name="arrow-back" size={24} color="white" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => {navigation.navigate("SupportPage", { source: 'RecipeDetails'})}} style={styles.headerButton}>
+              <Ionicons name="help-circle-outline" size={24} color="white" />
+            </TouchableOpacity>
           </View>
-        )}
-        <View style={styles.infoItem}>
-          <Ionicons name="person-outline" size={24} color={Color.e5481} />
-          <Text style={styles.infoText}>{recipe.creator}</Text>
         </View>
-        {recipe.likes !== undefined && (
-          <View style={styles.infoItem}>
-            <Ionicons name="heart-outline" size={24} color={Color.e5481} />
-            <Text style={styles.infoText}>{recipe.likes} likes</Text>
+
+        <View style={styles.contentContainer}>
+          <Text style={styles.title}>{recipe.title}</Text>
+
+          <View style={styles.infoContainer}>
+            <View style={styles.infoItem}>
+              <Ionicons name="time-outline" size={20} color={Color.e5481} />
+              <Text style={styles.infoText}>{recipe.time}</Text>
+            </View>
+            <View style={styles.infoItem}>
+              <Ionicons name="restaurant-outline" size={20} color={Color.e5481} />
+              <Text style={styles.infoText}>{recipe.category ? recipe.category.join(', ') : ''}</Text>
+            </View>
           </View>
-        )}
-      </View>
 
-      {recipe.description && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Description</Text>
-          <Text style={styles.description}>{recipe.description}</Text>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Description</Text>
+            <Text style={styles.description}>{recipe.description}</Text>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Ingredients</Text>
+            {recipe.ingredients.map((ingredient, index) => (
+              <View key={index} style={styles.listItem}>
+                <Ionicons 
+                  name="checkmark-circle-outline" 
+                  size={20} 
+                  color={isIngredientAvailable(ingredient.id) ? Color.lightGreen : Color.e5481} 
+                />
+                <Text style={styles.listItemText}>
+                  {`${" "}${ingredient.amount} ${ingredient.unit} ${getIngredientName(ingredient.id)}`}
+                </Text>
+              </View>
+            ))}
+          </View>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Instructions</Text>
+            {recipe.instructions.map((instruction, index) => (
+              <View key={index} style={styles.listItem}>
+                <Text style={styles.listItemNumber}>{index + 1}.</Text>
+                <Text style={styles.listItemText}>{instruction}</Text>
+              </View>
+            ))}
+          </View>
         </View>
-      )}
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Ingredients</Text>
-        {recipe.ingredients.map((ingredient, index) => (
-          <Text key={index} style={styles.listItem}>• {ingredient}</Text>
-        ))}
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Instructions</Text>
-        {recipe.instructions.map((instruction, index) => (
-          <Text key={index} style={styles.listItem}>{index + 1}. {instruction}</Text>
-        ))}
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
-type Styles = {
-  container: ViewStyle;
-  imageContainer: ViewStyle;
-  image: ImageStyle;
-  gradient: ViewStyle;
-  title: TextStyle;
-  infoContainer: ViewStyle;
-  infoItem: ViewStyle;
-  infoText: TextStyle;
-  section: ViewStyle;
-  sectionTitle: TextStyle;
-  description: TextStyle;
-  listItem: TextStyle;
-};
 
-const styles = StyleSheet.create<Styles>({
+
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Color.white,
   },
+  scrollView: {
+    flex: 1,
+  },
+  scrollViewContent: {
+    paddingBottom: 20,
+  },
   imageContainer: {
-    height: 250,
-    justifyContent: 'flex-end',
+    height: 300,
+    width: '100%',
   },
   image: {
-    ...StyleSheet.absoluteFillObject,
     width: '100%',
     height: '100%',
+    resizeMode: 'cover',
   },
   gradient: {
     ...StyleSheet.absoluteFillObject,
   },
-  title: {
-    fontSize: FontSize.h2_size,
-    fontWeight: '700',
-    color: Color.white,
+  headerButtons: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
+    right: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  headerButton: {
+    padding: 10,
+  },
+  contentContainer: {
     padding: 20,
+  },
+  title: {
+    fontSize: 30,
+    fontWeight: 'bold',
+    color: Color.neutral100,
     fontFamily: FontFamily.h2,
+    marginBottom: 10,
   },
   infoContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-around',
-    padding: 20,
-    backgroundColor: Color.white,
+    marginBottom: 20,
   },
   infoItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginRight: 20,
     marginBottom: 10,
   },
   infoText: {
@@ -153,9 +213,7 @@ const styles = StyleSheet.create<Styles>({
     color: Color.mainText,
   },
   section: {
-    padding: 20,
-    borderTopWidth: 1,
-    borderTopColor: Color.outline,
+    marginBottom: 20,
   },
   sectionTitle: {
     fontSize: FontSize.h2_size,
@@ -164,6 +222,9 @@ const styles = StyleSheet.create<Styles>({
     color: Color.e5481,
     fontFamily: FontFamily.h2,
   },
+  availableIngredient: {
+    color: Color.lightGreen,
+  },
   description: {
     fontSize: FontSize.p2_size,
     lineHeight: 25,
@@ -171,11 +232,23 @@ const styles = StyleSheet.create<Styles>({
     fontFamily: FontFamily.h2,
   },
   listItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 10,
+  },
+  listItemNumber: {
     fontSize: FontSize.p2_size,
-    lineHeight: 25,
-    marginBottom: 5,
+    fontWeight: 'bold',
+    color: Color.e5481,
+    marginRight: 10,
+    width: 25,
+  },
+  listItemText: {
+    fontSize: FontSize.p2_size,
+    lineHeight: 20,
     color: Color.mainText,
     fontFamily: FontFamily.h2,
+    flex: 1,
   },
 });
 

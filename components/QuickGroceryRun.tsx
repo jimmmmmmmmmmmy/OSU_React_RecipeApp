@@ -1,20 +1,35 @@
-import React from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import RecipeCard from './RecipeCard';
 import SectionHeader from './SectionHeader';
+import { FontFamily, FontSize, Color, Border } from "../GlobalStyles";
+import recipeData from '../data/recipeData.json';
+import images from '../data/images';
 
-const recipeData = [
-  { id: '1', title: "Spaghetti and Meatballs", time: "30 Mins", creator: "Italian Chef", ingredients: ['spaghetti', 'meatballs', 'tomato sauce'], instructions: ['Cook spaghetti', 'Prepare meatballs', 'Mix with sauce'] },
-  { id: '2', title: "Shrimp Fried Rice", time: "1 Hour", creator: "Asian Cuisine Expert", ingredients: ['rice', 'shrimp', 'vegetables'], instructions: ['Cook rice', 'Stir-fry shrimp and veggies', 'Mix everything'] },
-  { id: '3', title: "Vegan Pancakes", time: "20 Mins", creator: "Vegan Chef", ingredients: ['flour', 'plant milk', 'maple syrup'], instructions: ['Mix batter', 'Cook pancakes', 'Serve with syrup'] },
-  { id: '4', title: "Chicken Stir Fry", time: "25 Mins", creator: "Quick Meal Pro", ingredients: ['chicken', 'mixed vegetables', 'soy sauce'], instructions: ['Cut chicken', 'Stir-fry everything', 'Add sauce'] },
-  { id: '5', title: "Vegetable Curry", time: "45 Mins", creator: "Indian Cuisine Master", ingredients: ['mixed vegetables', 'curry paste', 'coconut milk'], instructions: ['Prepare vegetables', 'Cook curry sauce', 'Simmer together'] },
-  { id: '6', title: "Beef Tacos", time: "35 Mins", creator: "Mexican Food Expert", ingredients: ['beef', 'taco shells', 'toppings'], instructions: ['Cook beef', 'Prepare toppings', 'Assemble tacos'] },
-];
+const MealTypeTab = ({ title, isSelected, onPress }) => (
+  <TouchableOpacity 
+    style={[styles.tab, isSelected && styles.selectedTab]}
+    onPress={() => onPress(title)}
+  >
+    <Text style={[styles.tabText, isSelected && styles.selectedTabText]}>{title}</Text>
+  </TouchableOpacity>
+);
 
 const QuickGroceryRun = () => {
   const navigation = useNavigation();
+  const [selectedTab, setSelectedTab] = useState('All');
+
+  const mealTypes = ['All', 'Appetizer', 'Breakfast', 'Lunch', 'Dinner'];
+
+  const filteredRecipes = useMemo(() => {
+    if (selectedTab === 'All') {
+      return recipeData;
+    }
+    return recipeData.filter(recipe => 
+      recipe.category && recipe.category.includes(selectedTab)
+    );
+  }, [selectedTab]);
 
   const handleSeeAll = () => {
     navigation.navigate('RecipeCatalog', { source: 'QuickGroceryRun' });
@@ -27,15 +42,25 @@ const QuickGroceryRun = () => {
   return (
     <View style={styles.container}>
       <SectionHeader title="Quick grocery run:" onSeeAll={handleSeeAll} />
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabContainer}>
+        {mealTypes.map((type) => (
+          <MealTypeTab 
+            key={type}
+            title={type} 
+            isSelected={selectedTab === type} 
+            onPress={setSelectedTab} 
+          />
+        ))}
+      </ScrollView>
       <ScrollView 
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.cardsContainer}
       >
-        {recipeData.map((recipe) => (
+        {filteredRecipes.map((recipe) => (
           <RecipeCard
             key={recipe.id}
-            imageSource={require("../assets/image-61.png")}
+            imageSource={images[recipe.imageSource.split('/').pop().split('.')[0]]}
             title={recipe.title}
             time={recipe.time}
             creator={recipe.creator}
@@ -48,11 +73,32 @@ const QuickGroceryRun = () => {
   );
 };
 
-
 const styles = StyleSheet.create({
   container: {
     marginTop: 20,
     paddingHorizontal: 20,
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    marginBottom: 15,
+  },
+  tab: {
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    marginRight: 10,
+    borderRadius: 20,
+    backgroundColor: '#E0E0E0',
+  },
+  selectedTab: {
+    backgroundColor: '#444444',
+  },
+  tabText: {
+    color: '#757575',
+    fontFamily: FontFamily.textStyleSmallerTextRegular,
+    fontSize: FontSize.poppinsLabelBold_size,
+  },
+  selectedTabText: {
+    color: '#FFFFFF',
   },
   cardsContainer: {
     paddingHorizontal: 0,

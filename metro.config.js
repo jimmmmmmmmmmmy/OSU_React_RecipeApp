@@ -3,6 +3,8 @@ const { getDefaultConfig } = require('expo/metro-config');
 module.exports = (async () => {
   const defaultConfig = await getDefaultConfig(__dirname);
 
+  const { assetExts, sourceExts } = defaultConfig.resolver;
+
   return {
     ...defaultConfig,
     watchFolders: [
@@ -16,7 +18,8 @@ module.exports = (async () => {
     },
     resolver: {
       ...defaultConfig.resolver,
-      assetExts: [...defaultConfig.resolver.assetExts, 'png', 'otf', 'ttf'],
+      assetExts: [...assetExts, 'png', 'otf', 'ttf'].filter(ext => ext !== 'json'),
+      sourceExts: [...sourceExts, 'json'], // Add 'json' to sourceExts
     },
   };
 })();

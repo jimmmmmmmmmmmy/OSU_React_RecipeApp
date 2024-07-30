@@ -1,26 +1,52 @@
-import React from 'react';
-import { View, StyleSheet, ScrollView, Dimensions } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { useState, useCallback } from 'react';
+import { View, StyleSheet, ScrollView } from 'react-native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import RecipeCard from './RecipeCard';
 import SectionHeader from './SectionHeader';
-
-const { width } = Dimensions.get('window');
-const cardWidth = (width - 60) / 2.5; // Adjust this value to fit your design
-
-const recipeData = [
-  { id: '1', title: "Spaghetti and Meatballs", time: "30 Mins", creator: "Italian Chef", ingredients: ['spaghetti', 'meatballs', 'tomato sauce'], instructions: ['Cook spaghetti', 'Prepare meatballs', 'Mix with sauce'] },
-  { id: '2', title: "Shrimp Fried Rice", time: "1 Hour", creator: "Asian Cuisine Expert", ingredients: ['rice', 'shrimp', 'vegetables'], instructions: ['Cook rice', 'Stir-fry shrimp and veggies', 'Mix everything'] },
-  { id: '3', title: "Vegan Pancakes", time: "20 Mins", creator: "Vegan Chef", ingredients: ['flour', 'plant milk', 'maple syrup'], instructions: ['Mix batter', 'Cook pancakes', 'Serve with syrup'] },
-  { id: '4', title: "Chicken Stir Fry", time: "25 Mins", creator: "Quick Meal Pro", ingredients: ['chicken', 'mixed vegetables', 'soy sauce'], instructions: ['Cut chicken', 'Stir-fry everything', 'Add sauce'] },
-  { id: '5', title: "Vegetable Curry", time: "45 Mins", creator: "Indian Cuisine Master", ingredients: ['mixed vegetables', 'curry paste', 'coconut milk'], instructions: ['Prepare vegetables', 'Cook curry sauce', 'Simmer together'] },
-  { id: '6', title: "Beef Tacos", time: "35 Mins", creator: "Mexican Food Expert", ingredients: ['beef', 'taco shells', 'toppings'], instructions: ['Cook beef', 'Prepare toppings', 'Assemble tacos'] },
-];
+import recipeData from '../data/recipeData.json';
+import images from '../data/images';
 
 const RecipeRecommends = () => {
   const navigation = useNavigation();
+  const [sortedRecipes, setSortedRecipes] = useState([]);
+  const [userIngredients, setUserIngredients] = useState({ fridge: [], pantry: [] });
+
+  const loadUserIngredients = useCallback(async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem('userIngredients');
+      if (jsonValue != null) {
+        setUserIngredients(JSON.parse(jsonValue));
+      }
+    } catch (e) {
+      console.error('Failed to load user ingredients:', e);
+    }
+  }, []);
+
+  const countAvailableIngredients = useCallback((recipe) => {
+    return recipe.ingredients.filter(ingredient =>
+      userIngredients.fridge.some(item => item.id === ingredient.id) ||
+      userIngredients.pantry.some(item => item.id === ingredient.id && item.inStock)
+    ).length;
+  }, [userIngredients]);
+
+  const sortRecipes = useCallback(() => {
+    const sorted = [...recipeData].sort((a, b) => {
+      const aCount = countAvailableIngredients(a);
+      const bCount = countAvailableIngredients(b);
+      return bCount - aCount; // Sort in descending order
+    });
+    setSortedRecipes(sorted);
+  }, [countAvailableIngredients]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadUserIngredients().then(sortRecipes);
+    }, [loadUserIngredients, sortRecipes])
+  );
 
   const handleSeeAll = () => {
-    navigation.navigate('RecipeRecommendations');
+    navigation.navigate('RecipeRecommendations', { source: 'RecipeRecommends' });
   };
 
   const handleRecipePress = (recipe) => {
@@ -35,13 +61,13 @@ const RecipeRecommends = () => {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.cardsContainer}
       >
-        {recipeData.map((recipe, index) => (
+        {sortedRecipes.map((recipe) => (
           <RecipeCard
             key={recipe.id}
-            imageSource={require("../assets/image-61.png")}
+            imageSource={images[recipe.imageSource.split('/').pop().split('.')[0]]}
             title={recipe.title}
             time={recipe.time}
-            creator = {recipe.creator}
+            creator={recipe.creator}
             style={styles.card}
             onPress={() => handleRecipePress(recipe)}
           />

@@ -1,0 +1,24 @@
+{
+    "fridge": [
+      {
+        "id": "chicken_breast",
+        "quantity": 2,
+        "unit": "piece"
+      },
+      {
+        "id": "bell_pepper",
+        "quantity": 3,
+        "unit": "piece"
+      }
+    ],
+    "pantry": [
+      {
+        "id": "sesame_oil",
+        "inStock": true
+      },
+      {
+        "id": "soy_sauce",
+        "inStock": true
+      }
+    ]
+  }

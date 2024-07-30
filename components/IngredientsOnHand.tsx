@@ -1,83 +1,87 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { FontFamily, FontSize, Color, Border } from "../GlobalStyles";
+import React, { useState, useEffect, useMemo } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import RecipeCardCircular from './RecipeCardCircular';
+import SectionHeader from './SectionHeader';
+import { FontFamily, FontSize, Color, Border } from "../GlobalStyles";
+import recipeData from '../data/recipeData.json';
+import images from '../data/images';
 
-const MealTypeTab = ({ title, isSelected, onPress }) => (
+const MealTypeTab = ({ title, isSelected, onPress, disabled }) => (
   <TouchableOpacity 
-    style={[styles.tab, isSelected && styles.selectedTab]}
+    style={[
+      styles.tab, 
+      isSelected && styles.selectedTab,
+      disabled && styles.disabledTab
+    ]}
     onPress={() => onPress(title)}
+    disabled={disabled}
   >
-    <Text style={[styles.tabText, isSelected && styles.selectedTabText]}>{title}</Text>
+    <Text style={[
+      styles.tabText, 
+      isSelected && styles.selectedTabText,
+      disabled && styles.disabledTabText
+    ]}>{title}</Text>
   </TouchableOpacity>
-);
-
-const RecipeCard = ({ title, time }) => {
-  const [isLiked, setIsLiked] = useState(false);
-
-  return (
-    <View style={styles.recipeCard}>
-      <View style={styles.imageContainer}>
-        <Image 
-          source={require('../assets/image-61.png')} 
-          style={styles.foodImage}
-        />
-      </View>
-      <View style={styles.cardContent}>
-        <View style={styles.titleContainer}>
-          <Text style={styles.recipeTitle} numberOfLines={2}>{title}</Text>
-        </View>
-        <View style={styles.timeContainer}>
-          <Text style={styles.recipeTime}>{time}</Text>
-          <TouchableOpacity 
-            style={[styles.heartIconContainer, isLiked && styles.heartIconContainerLiked]} 
-            onPress={() => setIsLiked(!isLiked)}
-          >
-            <Ionicons 
-              name={isLiked ? "heart" : "heart-outline"}
-              size={20} 
-              color={isLiked ? '#FFFFFF' : '#000000'} 
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
-    </View>
-  );
-};
-
-const SectionHeader = ({ title, onSeeAll }) => (
-  <View style={styles.header}>
-    <Text style={styles.sectionTitle}>{title}</Text>
-    <TouchableOpacity style={styles.seeAllButton} onPress={onSeeAll}>
-      <Text style={styles.seeAllText}>See all</Text>
-      <Image
-        style={styles.arrowIcon}
-        source={require("../assets/iconarrowright.png")}
-      />
-    </TouchableOpacity>
-  </View>
 );
 
 const IngredientsOnHand = () => {
   const navigation = useNavigation();
-  const [selectedTab, setSelectedTab] = useState('Appetizer');
+  const [selectedTab, setSelectedTab] = useState('Dinner');
+  const [userIngredients, setUserIngredients] = useState({ fridge: [], pantry: [] });
 
   const mealTypes = ['Appetizer', 'Breakfast', 'Lunch', 'Dinner'];
-  const recipes = [
-    { title: "Chopped Spring", time: "20 Mins" },
-    { title: "Grilled Salmon", time: "25 Mins" },
-    { title: "Vegetable Stir Fry", time: "15 Mins" },
-    { title: "Chicken Curry", time: "30 Mins" },
-    { title: "Pasta Primavera", time: "22 Mins" },
-  ];
+
+  useEffect(() => {
+    loadUserIngredients();
+  }, []);
+
+  const loadUserIngredients = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem('userIngredients');
+      if (jsonValue != null) {
+        setUserIngredients(JSON.parse(jsonValue));
+      }
+    } catch (e) {
+      console.error('Failed to load user ingredients:', e);
+    }
+  };
+
+  const hasAllIngredients = (recipe) => {
+    return recipe.ingredients.every(ingredient => 
+      userIngredients.fridge.some(item => item.id === ingredient.id) ||
+      userIngredients.pantry.some(item => item.id === ingredient.id && item.inStock)
+    );
+  };
+
+  const availableRecipes = useMemo(() => {
+    return recipeData.filter(recipe => hasAllIngredients(recipe));
+  }, [userIngredients]);
+
+  const filteredRecipes = useMemo(() => {
+    return availableRecipes.filter(recipe => 
+      recipe.category && recipe.category.includes(selectedTab)
+    );
+  }, [selectedTab, availableRecipes]);
+
+  const availableMealTypes = useMemo(() => {
+    return mealTypes.filter(type => 
+      availableRecipes.some(recipe => recipe.category && recipe.category.includes(type))
+    );
+  }, [availableRecipes]);
+
+  const handleSeeAll = () => {
+    navigation.navigate('RecipeCatalog', { source: 'IngredientsOnHand' });
+  };
+
+  const handleRecipePress = (recipe) => {
+    navigation.navigate('RecipeDetails', { recipe });
+  };
 
   return (
     <View style={styles.container}>
-      <SectionHeader 
-        title="Ingredients on hand:" 
-        onSeeAll={() => navigation.navigate('RecipeCatalog', { source: 'IngredientsOnHand' })}
-      />
+      <SectionHeader title="Ingredients on hand:" onSeeAll={handleSeeAll} />
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabContainer}>
         {mealTypes.map((type) => (
           <MealTypeTab 
@@ -85,14 +89,32 @@ const IngredientsOnHand = () => {
             title={type} 
             isSelected={selectedTab === type} 
             onPress={setSelectedTab} 
+            disabled={!availableMealTypes.includes(type)}
           />
         ))}
       </ScrollView>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.recipeContainer}>
-        {recipes.map((recipe, index) => (
-          <RecipeCard key={index} title={recipe.title} time={recipe.time} />
+      <ScrollView 
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.recipeContainer}
+      >
+        {filteredRecipes.map((recipe) => (
+          <RecipeCardCircular
+            key={recipe.id}
+            imageSource={images[recipe.imageSource.split('/').pop().split('.')[0]]}
+            title={recipe.title}
+            time={recipe.time}
+            onPress={() => handleRecipePress(recipe)}
+          />
         ))}
       </ScrollView>
+      {filteredRecipes.length === 0 && (
+        <Text style={styles.noRecipesText}>
+          {availableRecipes.length === 0 
+            ? "No recipes available with your current ingredients."
+            : `No ${selectedTab.toLowerCase()} recipes available with your current ingredients.`}
+        </Text>
+      )}
     </View>
   );
 };
@@ -101,33 +123,6 @@ const styles = StyleSheet.create({
   container: {
     marginTop: 20,
     paddingHorizontal: 20,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  sectionTitle: {
-    fontSize: FontSize.textStyleLargeTextBold_size,
-    fontWeight: "600",
-    fontFamily: FontFamily.textStyleSmallerTextRegular,
-    color: Color.neutral100,
-  },
-  seeAllButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  seeAllText: {
-    fontSize: FontSize.poppinsLabelBold_size,
-    fontWeight: "500",
-    fontFamily: FontFamily.textStyleSmallerTextRegular,
-    color: Color.colourStylesNeutralColourGray3,
-    marginRight: 5,
-  },
-  arrowIcon: {
-    width: 20,
-    height: 20,
   },
   tabContainer: {
     flexDirection: 'row',
@@ -145,84 +140,34 @@ const styles = StyleSheet.create({
   },
   tabText: {
     color: '#757575',
+    fontFamily: FontFamily.textStyleSmallerTextRegular,
+    fontSize: FontSize.poppinsLabelBold_size,
   },
   selectedTabText: {
     color: '#FFFFFF',
   },
   recipeContainer: {
-    paddingTop: 10,
+    paddingVertical: 10,
   },
-  recipeCard: {
-    width: 180, // Increased width
-    marginRight: 15,
-    alignItems: 'center',
-  },
-  imageContainer: {
-    width: 140, // Larger circular image
-    height: 140,
-    borderRadius: 70,
-    backgroundColor: 'white',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: -50, // Increased overlap
-    zIndex: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  foodImage: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-  },
-  titleContainer: {
-    height: 50, // Fixed height for title area
-    justifyContent: 'center',
-  },
-  cardContent: {
-    backgroundColor: '#F0F0F0',
-    borderRadius: 12,
-    width: '100%',
-    paddingTop: 60,
-    paddingBottom: 20,
-    paddingHorizontal: 15,
-    alignItems: 'center',
-    height: 180, // Fixed height for the card content
-    justifyContent: 'space-between', // Distribute space evenly
-  },  
-  recipeTitle: {
-    fontSize: 18,
-    fontWeight: '600',
+  noRecipesText: {
     textAlign: 'center',
+    marginTop: 20,
+    fontSize: FontSize.poppinsLabelBold_size,
+    color: Color.neutral100,
+    fontFamily: FontFamily.textStyleSmallerTextRegular,
   },
-  timeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    width: '100%',
+  disabledTab: {
+    opacity: 0.5,
   },
-  recipeTime: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#757575',
+  disabledTabText: {
+    color: '#BDBDBD',
   },
-  heartIconContainer: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: 'white',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.20,
-    shadowRadius: 1.41,
-    elevation: 2,
-  },
-  heartIconContainerLiked: {
-    backgroundColor: '#FF0000',
+  noRecipesText: {
+    textAlign: 'center',
+    marginTop: 20,
+    fontSize: FontSize.poppinsLabelBold_size,
+    color: Color.neutral100,
+    fontFamily: FontFamily.textStyleSmallerTextRegular,
   },
 });
 

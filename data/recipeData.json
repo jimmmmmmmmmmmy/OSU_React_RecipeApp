@@ -1,0 +1,209 @@
+[
+    {
+      "id": "1",
+      "title": "Spaghetti and Meatballs",
+      "time": "30 Mins",
+      "creator": "Italian Chef",
+      "ingredients": [
+        {"id": "spaghetti", "amount": 1, "unit": "lb"},
+        {"id": "ground_beef", "amount": 1, "unit": "lb"},
+        {"id": "breadcrumbs", "amount": 1, "unit": "cup"},
+        {"id": "egg", "amount": 1, "unit": "piece"},
+        {"id": "garlic", "amount": 2, "unit": "clove"},
+        {"id": "tomato_sauce", "amount": 1, "unit": "can"},
+        {"id": "oregano", "amount": 1, "unit": "tsp"},
+        {"id": "salt", "amount": 1, "unit": "to taste"},
+        {"id": "pepper", "amount": 1, "unit": "to taste"}
+      ],
+      "description": "Classic Italian comfort food with juicy meatballs and tangy tomato sauce.",
+      "instructions": [
+        "Cook spaghetti according to package instructions.",
+        "Mix ground beef, breadcrumbs, egg, and garlic. Form into meatballs.",
+        "Brown meatballs in a pan, then add tomato sauce and oregano.",
+        "Simmer for 20 minutes.",
+        "Serve meatballs and sauce over spaghetti."
+      ],
+      "imageSource": "../assets/spaghetti_meatballs.png",
+      "category": ["Italian", "Dinner"]
+    },
+    {
+      "id": "2",
+      "title": "Avocado Toast",
+      "time": "10 Mins",
+      "creator": "Brunch Enthusiast",
+      "ingredients": [
+        {"id": "whole_grain_bread", "amount": 2, "unit": "slice"},
+        {"id": "avocado", "amount": 1, "unit": "piece"},
+        {"id": "egg", "amount": 2, "unit": "piece"},
+        {"id": "salt", "amount": 1, "unit": "to taste"},
+        {"id": "pepper", "amount": 1, "unit": "to taste"},
+        {"id": "red_pepper_flakes", "amount": 1, "unit": "to taste"}
+      ],
+      "description": "Simple and nutritious breakfast favorite with creamy avocado and protein-rich eggs.",
+      "instructions": [
+        "Toast the bread slices.",
+        "Mash the avocado and spread on toast.",
+        "Fry or poach eggs to your liking.",
+        "Place eggs on avocado toast.",
+        "Season with salt, pepper, and red pepper flakes if desired."
+      ],
+      "imageSource": "../assets/avocado_toast.png",
+      "category": ["Breakfast", "Vegetarian"]
+    },
+    {
+      "id": "3",
+      "title": "Chicken Stir Fry",
+      "time": "25 Mins",
+      "creator": "Quick Meal Pro",
+      "ingredients": [
+        {"id": "chicken_breast", "amount": 2, "unit": "piece"},
+        {"id": "bell_pepper", "amount": 1, "unit": "piece"},
+        {"id": "broccoli", "amount": 1, "unit": "cup"},
+        {"id": "carrot", "amount": 1, "unit": "piece"},
+        {"id": "soy_sauce", "amount": 2, "unit": "tbsp"},
+        {"id": "vegetable_oil", "amount": 1, "unit": "tbsp"},
+        {"id": "sesame_oil", "amount": 1, "unit": "tsp"},
+        {"id": "garlic", "amount": 2, "unit": "clove"}
+      ],
+      "description": "A quick and healthy Asian-inspired dish packed with vegetables and lean protein.",
+      "instructions": [
+        "Heat oils in a wok or large pan.",
+        "Stir fry chicken until cooked through, then set aside.",
+        "Stir fry vegetables and garlic until crisp-tender.",
+        "Return chicken to pan, add soy sauce, and stir to combine.",
+        "Serve hot, optionally over rice."
+      ],
+      "imageSource": "../assets/chicken_stirfry.png",
+      "category": ["Chinese", "Dinner", "Quick Meals"]
+    },
+    {
+      "id": "4",
+      "title": "Bruschetta",
+      "time": "15 Mins",
+      "creator": "Italian Appetizer Expert",
+      "ingredients": [
+        {"id": "baguette", "amount": 1, "unit": "piece"},
+        {"id": "tomato", "amount": 4, "unit": "piece"},
+        {"id": "garlic", "amount": 2, "unit": "clove"},
+        {"id": "basil", "amount": 1/4, "unit": "cup"},
+        {"id": "olive_oil", "amount": 2, "unit": "tbsp"},
+        {"id": "balsamic_vinegar", "amount": 1, "unit": "tbsp"},
+        {"id": "salt", "amount": 1, "unit": "to taste"},
+        {"id": "pepper", "amount": 1, "unit": "to taste"}
+      ],
+      "description": "A classic Italian appetizer featuring fresh tomatoes and herbs on crispy bread.",
+      "instructions": [
+        "Slice baguette and toast until crispy.",
+        "Dice tomatoes and mix with minced garlic, chopped basil, olive oil, and balsamic vinegar.",
+        "Season the tomato mixture with salt and pepper.",
+        "Top each bread slice with the tomato mixture.",
+        "Serve immediately."
+      ],
+      "imageSource": "../assets/bruschetta.png",
+      "category": ["Italian", "Appetizer"]
+    },
+    {
+      "id": "5",
+      "title": "Spinach and Artichoke Dip",
+      "time": "30 Mins",
+      "creator": "Party Snack Master",
+      "ingredients": [
+        {"id": "spinach", "amount": 10, "unit": "oz"},
+        {"id": "artichoke_hearts", "amount": 14, "unit": "oz"},
+        {"id": "cream_cheese", "amount": 8, "unit": "oz"},
+        {"id": "sour_cream", "amount": 0.25, "unit": "cup"},
+        {"id": "mayonnaise", "amount": 0.25, "unit": "cup"},
+        {"id": "parmesan_cheese", "amount": 0.5, "unit": "cup"},
+        {"id": "garlic", "amount": 2, "unit": "clove"},
+        {"id": "salt", "amount": 1, "unit": "to taste"},
+        {"id": "pepper", "amount": 1, "unit": "to taste"}
+      ],
+      "description": "A creamy, cheesy dip perfect for parties or game day snacking.",
+      "instructions": [
+        "Preheat oven to 350°F (175°C).",
+        "Mix all ingredients in a large bowl.",
+        "Transfer mixture to a baking dish.",
+        "Bake for 20-25 minutes until hot and bubbly.",
+        "Serve with crackers or bread for dipping."
+      ],
+      "imageSource": "../assets/spinach_artichoke_dip.png",
+      "category": ["Appetizer", "Party Food"]
+    },
+    {
+      "id": "6",
+      "title": "Breakfast Burrito",
+      "time": "20 Mins",
+      "creator": "Morning Wrap Master",
+      "ingredients": [
+        {"id": "tortilla", "amount": 4, "unit": "piece"},
+        {"id": "egg", "amount": 6, "unit": "piece"},
+        {"id": "bacon", "amount": 4, "unit": "slice"},
+        {"id": "cheddar_cheese", "amount": 0.5, "unit": "cup"},
+        {"id": "bell_pepper", "amount": 1, "unit": "piece"},
+        {"id": "onion", "amount": 0.5, "unit": "piece"},
+        {"id": "salt", "amount": 1, "unit": "to taste"},
+        {"id": "pepper", "amount": 1, "unit": "to taste"}
+      ],
+      "description": "A hearty breakfast wrap filled with scrambled eggs, bacon, and vegetables.",
+      "instructions": [
+        "Cook bacon until crispy, then crumble.",
+        "Sauté diced bell pepper and onion until soft.",
+        "Scramble eggs with salt and pepper.",
+        "Warm tortillas and fill with eggs, bacon, vegetables, and cheese.",
+        "Roll up burritos and serve hot."
+      ],
+      "imageSource": "../assets/breakfast_burrito.png",
+      "category": ["Breakfast", "Quick Meals"]
+    },
+    {
+      "id": "7",
+      "title": "Caesar Salad",
+      "time": "15 Mins",
+      "creator": "Salad Enthusiast",
+      "ingredients": [
+        {"id": "romaine_lettuce", "amount": 1, "unit": "head"},
+        {"id": "croutons", "amount": 1, "unit": "cup"},
+        {"id": "parmesan_cheese", "amount": 1/2, "unit": "cup"},
+        {"id": "caesar_dressing", "amount": 1/4, "unit": "cup"},
+        {"id": "lemon_juice", "amount": 1, "unit": "tbsp"},
+        {"id": "black_pepper", "amount": 1, "unit": "to taste"}
+      ],
+      "description": "A classic Caesar salad with crisp romaine lettuce and tangy dressing.",
+      "instructions": [
+        "Wash and chop romaine lettuce.",
+        "In a large bowl, toss lettuce with Caesar dressing and lemon juice.",
+        "Add croutons and grated Parmesan cheese.",
+        "Toss again to combine all ingredients.",
+        "Sprinkle with fresh ground black pepper and serve."
+      ],
+      "imageSource": "../assets/caesar_salad.png",
+      "category": ["Lunch", "Salad"]
+    },
+    {
+      "id": "8",
+      "title": "Grilled Chicken Sandwich",
+      "time": "25 Mins",
+      "creator": "Sandwich Expert",
+      "ingredients": [
+        {"id": "chicken_breast", "amount": 2, "unit": "piece"},
+        {"id": "burger_bun", "amount": 2, "unit": "piece"},
+        {"id": "lettuce", "amount": 2, "unit": "leaf"},
+        {"id": "tomato", "amount": 1, "unit": "piece"},
+        {"id": "red_onion", "amount": 1/4, "unit": "piece"},
+        {"id": "mayonnaise", "amount": 2, "unit": "tbsp"},
+        {"id": "mustard", "amount": 1, "unit": "tbsp"},
+        {"id": "salt", "amount": 1, "unit": "to taste"},
+        {"id": "pepper", "amount": 1, "unit": "to taste"}
+      ],
+      "description": "A delicious grilled chicken sandwich perfect for a quick lunch.",
+      "instructions": [
+        "Season chicken breasts with salt and pepper.",
+        "Grill chicken until fully cooked.",
+        "Toast burger buns lightly.",
+        "Spread mayonnaise and mustard on buns.",
+        "Assemble sandwich with chicken, lettuce, sliced tomato, and red onion."
+      ],
+      "imageSource": "../assets/grilled_chicken_sandwich.png",
+      "category": ["Lunch", "Sandwich"]
+    }
+  ]

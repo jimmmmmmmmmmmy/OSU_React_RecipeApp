@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from "expo-image";
@@ -8,38 +8,42 @@ import SearchField from "../components/SearchField";
 import ScrollableRecipeList from "../components/ScrollableRecipeList";
 import { Color, FontFamily, FontSize } from "../GlobalStyles";
 import { LinearGradient } from 'expo-linear-gradient';
-
-
-
+import recipeData from '../data/recipeData.json';
 
 const RecipeCatalog = () => {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
   const route = useRoute();
-  const { source } = route.params as { source?: string };
+  const { source, searchQuery } = route.params as { source?: string; searchQuery?: string };
+  const [filteredRecipes, setFilteredRecipes] = useState(recipeData);
 
-
-  // Sample recipe data
-  const recipes = [
-    { title: "Delicious Pasta", creator: "Chef John" },
-    { title: "Grilled Chicken Salad", creator: "Emma's Kitchen" },
-    { title: "Chocolate Cake", creator: "Sweet Treats" },
-    { title: "Vegetarian Stir Fry", creator: "Green Eats" },
-    { title: "Homemade Pizza", creator: "Italian Delights" },
-    // Add more recipes as needed
-  ];
+  useEffect(() => {
+    if (searchQuery) {
+      const lowercasedQuery = searchQuery.toLowerCase();
+      const filtered = recipeData.filter(recipe => 
+        recipe.title.toLowerCase().includes(lowercasedQuery) ||
+        recipe.ingredients.some(ingredient => 
+          ingredient.id.toLowerCase().includes(lowercasedQuery)
+        )
+      );
+      setFilteredRecipes(filtered);
+    } else {
+      setFilteredRecipes(recipeData);
+    }
+  }, [searchQuery]);
 
   const getSourceText = () => {
+    if (searchQuery) {
+      return `Search results for "${searchQuery}"`;
+    }
     switch (source) {
       case 'IngredientsOnHand':
         return "Ready to Cook";
       case 'QuickGroceryRun':
         return "With just a few more things";
       default:
-        return "Test";
+        return "All Recipes";
     }
   };
-
-
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
@@ -50,7 +54,7 @@ const RecipeCatalog = () => {
             source={require("../assets/vuesaxlineararrowleft2.png")}
           />
         </TouchableOpacity>
-        <Text style={styles.title}>Recipe Catallog</Text>
+        <Text style={styles.title}>Recipe Catalog</Text>
         <TouchableOpacity onPress={() => {navigation.navigate("SupportPage", { source: 'RecipeCatalog'})}}>
           <Image
             style={styles.icon}
@@ -79,16 +83,13 @@ const RecipeCatalog = () => {
       </View>
   
       <View style={styles.contentContainer}>
-        {getSourceText() && (
-          <Text style={styles.sourceText}>{getSourceText()}</Text>
-        )}
-  
+        <Text style={styles.sourceText}>{getSourceText()}</Text>
         <View style={styles.recipeListWrapper}>
           <LinearGradient
             colors={['rgba(255,255,255,1)', 'rgba(255,255,255,0)']}
             style={styles.fadedEdge}
           />
-          <ScrollableRecipeList recipes={recipes} />
+          <ScrollableRecipeList recipes={filteredRecipes} />
         </View>
       </View>
     </SafeAreaView>
