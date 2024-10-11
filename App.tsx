@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useFonts } from "expo-font";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import RemovingIngredient from "./screens/RemovingIngredient";
+import RemovingIngredient from "./components/RemovingIngredient";
 import IngredientsList from "./screens/IngredientsList";
 import RecipeRecommendations from "./screens/RecipeRecommendations";
 import Welcome from "./screens/Welcome";
@@ -12,7 +12,13 @@ import SupportPage from "./screens/SupportPage";
 import Home from "./screens/Home";
 import RecipeDetails from "./screens/RecipeDetails";
 import RecipeCatalog from "./screens/RecipeCatalog";
+import RecipeRecommendationService from './services/RecipeRecommendationService';
+import IngredientManagementService from './services/IngredientManagementService';
+import CookingTimerService from './services/CookingTimerService';
 
+RecipeRecommendationService;
+IngredientManagementService;
+CookingTimerService;
 
 const Stack = createNativeStackNavigator();
 

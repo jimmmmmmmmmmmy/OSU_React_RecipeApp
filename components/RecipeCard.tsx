@@ -8,6 +8,7 @@ interface RecipeCardProps {
   title: string;
   creator: string;
   style?: ViewStyle;
+  onPress: () => void;
 }
 
 const RecipeCard: React.FC<RecipeCardProps> = ({ 

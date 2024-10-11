@@ -3,15 +3,32 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'rea
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FontFamily, FontSize, Color, Border } from "../GlobalStyles";
 import ingredientsData from '../data/ingredientsData.json';
-import initialUserIngredients from '../data/userIngredients.json';
 import AddIngredient from '../components/AddIngredient';
 import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import EventBus from '../services/EventBus';
+import IngredientManagementService from '../services/IngredientManagementService';
 
-const IngredientItem = ({ name, quantity, unit, emoji, inStock, storageType, onDelete }) => {
+const handleDeleteIngredient = (id, storageType) => {
+  Alert.alert(
+    "Remove Ingredient",
+    "Are you sure you want to remove this ingredient?",
+    [
+      { text: "Cancel", style: "cancel" },
+      { 
+        text: "Remove", 
+        style: "destructive",
+        onPress: () => {
+          EventBus.publish('REMOVE_INGREDIENT', id);
+        }
+      }
+    ]
+  );
+};
+
+const IngredientItem = ({ id, name, quantity, unit, emoji, inStock, storageType }) => {
   const translateX = useSharedValue(0);
 
   const rStyle = useAnimatedStyle(() => ({
@@ -22,20 +39,7 @@ const IngredientItem = ({ name, quantity, unit, emoji, inStock, storageType, onD
     return (
       <TouchableOpacity 
         style={styles.deleteButton} 
-        onPress={() => {
-          Alert.alert(
-            "Remove Ingredient",
-            "Are you sure you want to remove this ingredient?",
-            [
-              { text: "Cancel", style: "cancel" },
-              { 
-                text: "Remove", 
-                style: "destructive",
-                onPress: onDelete
-              }
-            ]
-          );
-        }}
+        onPress={() => handleDeleteIngredient(id, storageType)}
       >
         <Ionicons name="trash-outline" size={24} color="white" />
       </TouchableOpacity>
@@ -66,59 +70,34 @@ const IngredientsList = () => {
   const [userIngredients, setUserIngredients] = useState({ fridge: [], pantry: [] });
 
   useEffect(() => {
-    loadUserIngredients();
+    const handleIngredientsUpdate = (ingredients) => {
+      console.log('Ingredients updated:', ingredients);
+      setUserIngredients(ingredients);
+    };
+  
+    const handleIngredientAdded = () => {
+      console.log('Ingredient added, refreshing list');
+      EventBus.publish('GET_USER_INGREDIENTS', {});
+    };
+  
+    const handleIngredientRemoved = () => {
+      console.log('Ingredient removed, refreshing list');
+      EventBus.publish('GET_USER_INGREDIENTS', {});
+    };
+  
+    EventBus.subscribe('USER_INGREDIENTS_UPDATED', handleIngredientsUpdate);
+    EventBus.subscribe('INGREDIENT_ADDED', handleIngredientAdded);
+    EventBus.subscribe('INGREDIENT_REMOVED', handleIngredientRemoved);
+    EventBus.publish('GET_USER_INGREDIENTS', {});
+  
+    return () => {
+      EventBus.unsubscribe('USER_INGREDIENTS_UPDATED', handleIngredientsUpdate);
+      EventBus.unsubscribe('INGREDIENT_ADDED', handleIngredientAdded);
+      EventBus.unsubscribe('INGREDIENT_REMOVED', handleIngredientRemoved);
+    };
   }, []);
 
-  const loadUserIngredients = async () => {
-    try {
-      const jsonValue = await AsyncStorage.getItem('userIngredients');
-      if (jsonValue != null) {
-        setUserIngredients(JSON.parse(jsonValue));
-      } else {
-        setUserIngredients(initialUserIngredients);
-        await AsyncStorage.setItem('userIngredients', JSON.stringify(initialUserIngredients));
-      }
-    } catch (e) {
-      console.error('Failed to load user ingredients:', e);
-      setUserIngredients(initialUserIngredients);
-    }
-  };
 
-  const saveUserIngredients = async (newUserIngredients) => {
-    try {
-      const jsonValue = JSON.stringify(newUserIngredients);
-      await AsyncStorage.setItem('userIngredients', jsonValue);
-    } catch (e) {
-      console.error('Failed to save user ingredients:', e);
-    }
-  };
-
-  const handleAddIngredient = (ingredient: {id: string, name: string, quantity: string, storageType: string}) => {
-    const newUserIngredients = { ...userIngredients };
-    const newIngredient = {
-      id: ingredient.id,
-      quantity: parseInt(ingredient.quantity),
-      unit: ingredientsData.find(i => i.id === ingredient.id)?.defaultUnit
-    };
-
-    if (ingredient.storageType === 'fridge') {
-      newUserIngredients.fridge.push(newIngredient);
-    } else if (ingredient.storageType === 'pantry') {
-      newUserIngredients.pantry.push({ id: ingredient.id, inStock: true });
-    }
-
-    setUserIngredients(newUserIngredients);
-    saveUserIngredients(newUserIngredients);
-  };
-
-  const handleDeleteIngredient = (id, storageType) => {
-    const newUserIngredients = { ...userIngredients };
-    newUserIngredients[storageType] = newUserIngredients[storageType].filter(
-      ingredient => ingredient.id !== id
-    );
-    setUserIngredients(newUserIngredients);
-    saveUserIngredients(newUserIngredients);
-  };
 
   const renderIngredients = (storageType) => {
     return userIngredients[storageType].map(userIngredient => {
@@ -127,13 +106,13 @@ const IngredientsList = () => {
       return (
         <IngredientItem
           key={userIngredient.id}
+          id={userIngredient.id}
           name={ingredientData.name}
           quantity={userIngredient.quantity}
           unit={userIngredient.unit || ingredientData.defaultUnit}
           emoji={ingredientData.emoji}
           inStock={userIngredient.inStock !== undefined ? userIngredient.inStock : true}
           storageType={ingredientData.storageType}
-          onDelete={() => handleDeleteIngredient(userIngredient.id, storageType)}
         />
       );
     });
@@ -172,7 +151,6 @@ const IngredientsList = () => {
         <AddIngredient
           isVisible={isAddIngredientVisible}
           onClose={() => setIsAddIngredientVisible(false)}
-          onAdd={handleAddIngredient}
         />
       </SafeAreaView>
     </GestureHandlerRootView>

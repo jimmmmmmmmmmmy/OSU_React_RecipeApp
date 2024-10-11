@@ -1,56 +1,19 @@
-import React, { useState, useEffect } from "react";
-import { StyleSheet, View, Text, TextInput, SafeAreaView, TouchableOpacity, Alert } from "react-native";
+import React, { useState } from "react";
 import { Image } from "expo-image";
+import { StyleSheet, View, Text, TextInput, SafeAreaView, TouchableOpacity } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { FontSize, FontFamily, Color, Border, Padding } from "../GlobalStyles";
-import * as FileSystem from 'expo-file-system';
+import InputField from "../components/InputField";
 
 const Welcome = ({ navigation }) => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loginStatus, setLoginStatus] = useState("");
 
-  const writeToFile = async (filename: string, content: string) => {
-    try {
-      const path = `${FileSystem.documentDirectory}${filename}`;
-      await FileSystem.writeAsStringAsync(path, content);
-    } catch (error) {
-      console.error(`Error writing to ${filename}:`, error);
-    }
+  const handleLogin = () => {
+    // Navigate to the Home screen
+    navigation.navigate("Home");
   };
 
-  const readFromFile = async (filename: string) => {
-    try {
-      const path = `${FileSystem.documentDirectory}${filename}`;
-      return await FileSystem.readAsStringAsync(path);
-    } catch (error) {
-      console.error(`Error reading from ${filename}:`, error);
-      return '';
-    }
-  };
-
-  const handleLogin = async () => {
-    try {
-      const response = await fetch('http://localhost:8000', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
-      const data = await response.json();
-      setLoginStatus(data.status);
-  
-      if (data.status === 'Placeholder') {
-        navigation.navigate("Home");
-      } else {
-        Alert.alert("Login Status", data.status);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      Alert.alert("Error", "Failed to connect to the server");
-    }
-  };
 
   return (
     <SafeAreaView style={styles.welcome}>
@@ -60,54 +23,53 @@ const Welcome = ({ navigation }) => {
         source={require("../assets/background2.png")}
       />
       
+      
       <LinearGradient
         style={styles.effect}
         locations={[1, 0]}
         colors={["#000", "rgba(0, 0, 0, 0)"]}
       />
+    
 
-      <View style={styles.content}>
-        <View style={styles.text}>
-          <Text style={styles.headerTitle}>Food Good</Text>
-          <Text style={styles.caption}>Get Cookin'</Text>
-        </View>
-        <View style={styles.inputWrapper}>
-          <Image 
+        <View style={styles.content}>
+          <View style={styles.text}>
+            <Text style={styles.headerTitle}>Food Good</Text>
+            <Text style={styles.caption}>Get Cookin'</Text>
+          </View>
+          <View style={styles.inputWrapper}>
+            <Image 
             source={require("../assets/Message2.png")} 
-            style={styles.inputIcon}
-          />
-          <TextInput
-            placeholder="Username"
-            value={username}
-            onChangeText={setUsername}
-            style={styles.input}
-            placeholderTextColor={Color.neutral10}
-          />
-        </View>
-        <View style={[styles.inputWrapper, styles.passwordInputWrapper]}>
-          <Image 
+            style={styles.inputIcon} />
+            <TextInput
+              placeholder="Email"
+              value={email}
+              onChangeText={setEmail}
+              style={styles.input}
+              placeholderTextColor={Color.neutral10}
+            />
+          </View>
+          <View style={[styles.inputWrapper, styles.passwordInputWrapper]}>
+            <Image 
             source={require("../assets/Lock2.png")} 
-            style={styles.inputIcon}
-          />
-          <TextInput
-            placeholder="Password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            style={styles.input}
-            placeholderTextColor={Color.neutral10}
-          />
+            style={styles.inputIcon} />
+            <TextInput
+              placeholder="Password"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              style={styles.input}
+              placeholderTextColor={Color.neutral10}
+            />
+          </View>
+          <TouchableOpacity style={styles.button} onPress={handleLogin}>
+            <Text style={styles.label}>Login</Text>
+            <Image
+              style={styles.iconarrowRight}
+              contentFit="cover"
+              source={require("../assets/iconarrowright2.png")}
+            />
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.label}>Login</Text>
-          <Image
-            style={styles.iconarrowRight}
-            contentFit="cover"
-            source={require("../assets/iconarrowright2.png")}
-          />
-        </TouchableOpacity>
-        {loginStatus ? <Text style={styles.statusText}>{loginStatus}</Text> : null}
-      </View>
     </SafeAreaView>
   );
 };
@@ -216,12 +178,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
     paddingBottom: 50,
-  },
-  statusText: {
-    marginTop: 20,
-    color: Color.white,
-    fontSize: FontSize.textStyleNormalTextBold_size,
-    textAlign: 'center',
   },
 });
 

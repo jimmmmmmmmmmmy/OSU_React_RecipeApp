@@ -1,9 +1,9 @@
 import * as React from "react";
 import { StyleSheet, View, Text } from "react-native";
 import { Image } from "expo-image";
-import FrameComponent1 from "../components/FrameComponent1";
-import Add from "../components/Add";
-import StatusBar2 from "../components/StatusBar2";
+import FrameComponent1 from "./FrameComponent1";
+import Add from "./Add";
+import StatusBar2 from "./StatusBar2";
 import { Padding, FontSize, FontFamily, Border, Color } from "../GlobalStyles";
 
 const RemovingIngredient = () => {

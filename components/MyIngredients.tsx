@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FontFamily, FontSize, Color, Border } from "../GlobalStyles";
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 import ingredientsData from '../data/ingredientsData.json';
+import EventBus from '../services/EventBus';
+import IngredientManagementService from '../services/IngredientManagementService';
 
 const IngredientItem = ({ name, quantity, unit, emoji, inStock, onPress }) => (
   <TouchableOpacity onPress={onPress} style={[styles.ingredientItem, inStock && styles.inStockItem]}>
@@ -24,20 +25,21 @@ const MyIngredients = () => {
   const navigation = useNavigation();
   const [userIngredients, setUserIngredients] = useState({ fridge: [], pantry: [] });
 
-  const loadUserIngredients = useCallback(async () => {
-    try {
-      const jsonValue = await AsyncStorage.getItem('userIngredients');
-      if (jsonValue != null) {
-        setUserIngredients(JSON.parse(jsonValue));
-      }
-    } catch (e) {
-      console.error('Failed to load user ingredients:', e);
-    }
-  }, []);
-
   useEffect(() => {
-    loadUserIngredients();
-  }, [loadUserIngredients]);
+    const handleIngredientsUpdate = (ingredients) => {
+      console.log('Received ingredients update:', ingredients);
+      setUserIngredients(ingredients);
+    };
+  
+    EventBus.subscribe('USER_INGREDIENTS_UPDATED', handleIngredientsUpdate);
+    EventBus.publish('GET_USER_INGREDIENTS', {});
+  
+    return () => {
+      EventBus.unsubscribe('USER_INGREDIENTS_UPDATED', handleIngredientsUpdate);
+    };
+  }, []);
+  
+  console.log('Rendering MyIngredients with:', userIngredients);
 
   const handleIngredientPress = () => {
     navigation.navigate('IngredientsList');
@@ -91,6 +93,7 @@ const MyIngredients = () => {
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {

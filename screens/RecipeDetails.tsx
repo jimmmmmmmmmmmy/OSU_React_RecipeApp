@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
 import { RouteProp } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from "expo-linear-gradient";
 import { Color, FontFamily, FontSize, Border } from "../GlobalStyles";
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import images from '../data/images';
 import ingredientsData from '../data/ingredientsData.json';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import EventBus from '../services/EventBus';
+import '../services/CookingTimerService'; // This will instantiate the service
 
+// Type definitions
 type Ingredient = {
   id: string;
   amount: number;
@@ -40,14 +42,28 @@ type Props = {
   route: RecipeDetailsRouteProp;
 };
 
+
 const RecipeDetails: React.FC<Props> = ({ route }) => {
   const { recipe } = route.params;
   const navigation = useNavigation();
   const [userIngredients, setUserIngredients] = useState({ fridge: [], pantry: [] });
+  const [timer, setTimer] = useState<{ id: string; remainingTime: number; isRunning: boolean } | null>(null);
 
   useEffect(() => {
     loadUserIngredients();
-  }, []);
+    EventBus.subscribe('TIMER_DATA', handleTimerData);
+    EventBus.subscribe('TIMER_UPDATED', handleTimerUpdated);
+    EventBus.subscribe('TIMER_FINISHED', handleTimerFinished);
+    EventBus.subscribe('TIMER_STARTED', handleTimerStarted);
+    EventBus.publish('GET_TIMER', { recipeId: recipe.id });
+
+    return () => {
+      EventBus.unsubscribe('TIMER_DATA', handleTimerData);
+      EventBus.unsubscribe('TIMER_UPDATED', handleTimerUpdated);
+      EventBus.unsubscribe('TIMER_FINISHED', handleTimerFinished);
+      EventBus.unsubscribe('TIMER_STARTED', handleTimerStarted);
+    };
+  }, [recipe.id]);
 
   const loadUserIngredients = async () => {
     try {
@@ -60,9 +76,70 @@ const RecipeDetails: React.FC<Props> = ({ route }) => {
     }
   };
 
+  const handleTimerData = (timerData: { id: string; remainingTime: number; isRunning: boolean } | null) => {
+    console.log('Timer data received:', timerData);
+    if (timerData && typeof timerData.remainingTime === 'undefined') {
+      console.warn('Timer data is missing remainingTime property');
+      return;
+    }
+    setTimer(timerData);
+  };
+
+  const handleTimerUpdated = (updatedTimer: { id: string; recipeId: string; remainingTime: number; isRunning: boolean }) => {
+    console.log('Timer updated:', updatedTimer);
+    if (updatedTimer.recipeId === recipe.id) {
+      if (typeof updatedTimer.remainingTime === 'undefined') {
+        console.warn('Updated timer is missing remainingTime property');
+        return;
+      }
+      setTimer(prevTimer => ({
+        ...prevTimer,
+        ...updatedTimer,
+      }));
+    }
+  };
+
+  const handleTimerStarted = (startedTimer: { id: string; recipeId: string; remainingTime: number; isRunning: boolean }) => {
+    console.log('Timer started:', startedTimer);
+    if (startedTimer.recipeId === recipe.id) {
+      setTimer(startedTimer);
+    }
+  };
+
+  const handleTimerFinished = (timerId: string) => {
+    if (timer && timer.id === timerId) {
+      setTimer(null);
+      // You can add an alert or notification here to inform the user that the timer is finished
+    }
+  };
+
+  const startTimer = () => {
+    console.log('Starting timer for recipe:', recipe.id);
+    const duration = parseInt(recipe.time.split(' ')[0], 10) * 60; // Convert minutes to seconds
+    EventBus.publish('START_TIMER', { recipeId: recipe.id, duration: duration });
+  };
+
+  const pauseTimer = () => {
+    if (timer) {
+      EventBus.publish('PAUSE_TIMER', { timerId: timer.id });
+    }
+  };
+
+  const resumeTimer = () => {
+    if (timer) {
+      EventBus.publish('RESUME_TIMER', { timerId: timer.id });
+    }
+  };
+
+  const stopTimer = () => {
+    if (timer) {
+      EventBus.publish('STOP_TIMER', { timerId: timer.id });
+    }
+  };
+
   const getImageSource = (imagePath: string) => {
     const imageName = imagePath.split('/').pop()?.split('.')[0];
-    return imageName ? images[imageName] : null;
+    return imageName ? (images as Record<string, any>)[imageName] : null;
   };
 
   const getIngredientName = (id: string) => {
@@ -71,8 +148,14 @@ const RecipeDetails: React.FC<Props> = ({ route }) => {
   };
 
   const isIngredientAvailable = (ingredientId: string): boolean => {
-    return userIngredients.fridge.some(item => item.id === ingredientId) ||
-           userIngredients.pantry.some(item => item.id === ingredientId && item.inStock);
+    return userIngredients.fridge.some((item: { id: string }) => item.id === ingredientId) ||
+           userIngredients.pantry.some((item: { id: string; inStock: boolean }) => item.id === ingredientId && item.inStock);
+  };
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
   return (
@@ -83,7 +166,7 @@ const RecipeDetails: React.FC<Props> = ({ route }) => {
       >
         <View style={styles.imageContainer}>
           <Image
-            source={getImageSource(recipe.imageSource)}
+            source={getImageSource(recipe.imageSource || '')}
             style={styles.image}
           />
           <LinearGradient
@@ -94,7 +177,7 @@ const RecipeDetails: React.FC<Props> = ({ route }) => {
             <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
               <Ionicons name="arrow-back" size={24} color="white" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => {navigation.navigate("SupportPage", { source: 'RecipeDetails'})}} style={styles.headerButton}>
+            <TouchableOpacity onPress={() => navigation.navigate("SupportPage", { source: 'RecipeDetails'})} style={styles.headerButton}>
               <Ionicons name="help-circle-outline" size={24} color="white" />
             </TouchableOpacity>
           </View>
@@ -102,6 +185,35 @@ const RecipeDetails: React.FC<Props> = ({ route }) => {
 
         <View style={styles.contentContainer}>
           <Text style={styles.title}>{recipe.title}</Text>
+
+          <View style={styles.timerContainer}>
+            {timer ? (
+              <>
+                <Text style={styles.timerText}>
+                  {formatTime(timer.remainingTime)}
+                </Text>
+                <Text style={styles.timerStatus}>
+                  {timer.isRunning ? 'Running' : 'Paused'}
+                </Text>
+                {timer.isRunning ? (
+                  <TouchableOpacity style={styles.timerButton} onPress={pauseTimer}>
+                    <Text style={styles.timerButtonText}>Pause</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity style={styles.timerButton} onPress={resumeTimer}>
+                    <Text style={styles.timerButtonText}>Resume</Text>
+                  </TouchableOpacity>
+                )}
+                <TouchableOpacity style={styles.timerButton} onPress={stopTimer}>
+                  <Text style={styles.timerButtonText}>Stop</Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <TouchableOpacity style={styles.timerButton} onPress={startTimer}>
+                <Text style={styles.timerButtonText}>Start Timer</Text>
+              </TouchableOpacity>
+            )}
+          </View>
 
           <View style={styles.infoContainer}>
             <View style={styles.infoItem}>
@@ -134,6 +246,7 @@ const RecipeDetails: React.FC<Props> = ({ route }) => {
               </View>
             ))}
           </View>
+
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Instructions</Text>
             {recipe.instructions.map((instruction, index) => (
@@ -148,8 +261,6 @@ const RecipeDetails: React.FC<Props> = ({ route }) => {
     </SafeAreaView>
   );
 };
-
-
 
 const styles = StyleSheet.create({
   container: {
@@ -249,6 +360,31 @@ const styles = StyleSheet.create({
     color: Color.mainText,
     fontFamily: FontFamily.h2,
     flex: 1,
+  },
+  timerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 10,
+  },
+  timerText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginRight: 10,
+  },
+  timerStatus: {
+    fontSize: 18,
+    marginRight: 10,
+  },
+  timerButton: {
+    backgroundColor: Color.e5481,
+    padding: 10,
+    borderRadius: 5,
+    marginHorizontal: 5,
+  },
+  timerButtonText: {
+    color: Color.white,
+    fontWeight: 'bold',
   },
 });
 

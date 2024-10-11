@@ -8,18 +8,49 @@ import SearchField from "../components/SearchField";
 import ScrollableRecipeList from "../components/ScrollableRecipeList";
 import { Color, FontFamily, FontSize } from "../GlobalStyles";
 import { LinearGradient } from 'expo-linear-gradient';
-import recipeData from '../data/recipeData.json';
+import EventBus from '../services/EventBus';
 
 const RecipeCatalog = () => {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
   const route = useRoute();
   const { source, searchQuery } = route.params as { source?: string; searchQuery?: string };
-  const [filteredRecipes, setFilteredRecipes] = useState(recipeData);
+  const [recipes, setRecipes] = useState([]);
+  const [filteredRecipes, setFilteredRecipes] = useState([]);
 
   useEffect(() => {
-    if (searchQuery) {
-      const lowercasedQuery = searchQuery.toLowerCase();
-      const filtered = recipeData.filter(recipe => 
+    const handleRecommendations = (receivedRecipes) => {
+      setRecipes(receivedRecipes);
+      filterRecipes(receivedRecipes, searchQuery);
+    };
+
+    const handleAvailableRecipes = (receivedRecipes) => {
+      setRecipes(receivedRecipes);
+      filterRecipes(receivedRecipes, searchQuery);
+    };
+
+    EventBus.subscribe('RECIPE_RECOMMENDATIONS_READY', handleRecommendations);
+    EventBus.subscribe('RECIPES_WITH_AVAILABLE_INGREDIENTS_READY', handleAvailableRecipes);
+
+    if (source === 'IngredientsOnHand') {
+      EventBus.publish('GET_RECIPES_WITH_AVAILABLE_INGREDIENTS', {});
+    } else {
+      EventBus.publish('GET_RECIPE_RECOMMENDATIONS', {});
+    }
+
+    return () => {
+      EventBus.unsubscribe('RECIPE_RECOMMENDATIONS_READY', handleRecommendations);
+      EventBus.unsubscribe('RECIPES_WITH_AVAILABLE_INGREDIENTS_READY', handleAvailableRecipes);
+    };
+  }, [source]);
+
+  useEffect(() => {
+    filterRecipes(recipes, searchQuery);
+  }, [searchQuery, recipes]);
+
+  const filterRecipes = (recipesToFilter, query) => {
+    if (query) {
+      const lowercasedQuery = query.toLowerCase();
+      const filtered = recipesToFilter.filter(recipe => 
         recipe.title.toLowerCase().includes(lowercasedQuery) ||
         recipe.ingredients.some(ingredient => 
           ingredient.id.toLowerCase().includes(lowercasedQuery)
@@ -27,9 +58,9 @@ const RecipeCatalog = () => {
       );
       setFilteredRecipes(filtered);
     } else {
-      setFilteredRecipes(recipeData);
+      setFilteredRecipes(recipesToFilter);
     }
-  }, [searchQuery]);
+  };
 
   const getSourceText = () => {
     if (searchQuery) {
@@ -44,6 +75,9 @@ const RecipeCatalog = () => {
         return "All Recipes";
     }
   };
+
+
+
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <View style={styles.header}>

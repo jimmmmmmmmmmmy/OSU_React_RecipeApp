@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import RecipeCardCircular from './RecipeCardCircular';
 import SectionHeader from './SectionHeader';
 import { FontFamily, FontSize, Color, Border } from "../GlobalStyles";
-import recipeData from '../data/recipeData.json';
 import images from '../data/images';
+import EventBus from '../services/EventBus';
 
 const MealTypeTab = ({ title, isSelected, onPress, disabled }) => (
   <TouchableOpacity 
@@ -26,38 +25,47 @@ const MealTypeTab = ({ title, isSelected, onPress, disabled }) => (
   </TouchableOpacity>
 );
 
+const getDefaultTab = (availableRecipes) => {
+  const currentHour = new Date().getHours();
+  const availableMealTypes = ['Appetizer', 'Breakfast', 'Lunch', 'Dinner'].filter(type => 
+    availableRecipes.some(recipe => recipe.category && recipe.category.includes(type))
+  );
+
+  if (availableMealTypes.length === 0) return 'Dinner'; // Default if no recipes available
+
+  if (availableMealTypes.includes('Breakfast') && currentHour >= 5 && currentHour < 11) {
+    return 'Breakfast';
+  } else if (availableMealTypes.includes('Lunch') && currentHour >= 11 && currentHour < 16) {
+    return 'Lunch';
+  } else if (availableMealTypes.includes('Dinner') && (currentHour >= 16 || currentHour < 5)) {
+    return 'Dinner';
+  } else if (availableMealTypes.includes('Appetizer')) {
+    return 'Appetizer';
+  }
+
+  return availableMealTypes[0]; // First available meal type if time doesn't match
+};
+
 const IngredientsOnHand = () => {
   const navigation = useNavigation();
-  const [selectedTab, setSelectedTab] = useState('Dinner');
-  const [userIngredients, setUserIngredients] = useState({ fridge: [], pantry: [] });
+  const [selectedTab, setSelectedTab] = useState(() => getDefaultTab([]));
+  const [availableRecipes, setAvailableRecipes] = useState([]);
 
   const mealTypes = ['Appetizer', 'Breakfast', 'Lunch', 'Dinner'];
 
   useEffect(() => {
-    loadUserIngredients();
+    const handleAvailableRecipes = (recipes) => {
+      setAvailableRecipes(recipes);
+      setSelectedTab(getDefaultTab(recipes));
+    };
+  
+    EventBus.subscribe('RECIPES_WITH_AVAILABLE_INGREDIENTS_READY', handleAvailableRecipes);
+    EventBus.publish('GET_RECIPES_WITH_AVAILABLE_INGREDIENTS', {});
+  
+    return () => {
+      EventBus.unsubscribe('RECIPES_WITH_AVAILABLE_INGREDIENTS_READY', handleAvailableRecipes);
+    };
   }, []);
-
-  const loadUserIngredients = async () => {
-    try {
-      const jsonValue = await AsyncStorage.getItem('userIngredients');
-      if (jsonValue != null) {
-        setUserIngredients(JSON.parse(jsonValue));
-      }
-    } catch (e) {
-      console.error('Failed to load user ingredients:', e);
-    }
-  };
-
-  const hasAllIngredients = (recipe) => {
-    return recipe.ingredients.every(ingredient => 
-      userIngredients.fridge.some(item => item.id === ingredient.id) ||
-      userIngredients.pantry.some(item => item.id === ingredient.id && item.inStock)
-    );
-  };
-
-  const availableRecipes = useMemo(() => {
-    return recipeData.filter(recipe => hasAllIngredients(recipe));
-  }, [userIngredients]);
 
   const filteredRecipes = useMemo(() => {
     return availableRecipes.filter(recipe => 

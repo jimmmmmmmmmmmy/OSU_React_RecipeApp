@@ -12,14 +12,14 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { Color, FontFamily, FontSize, Border } from "../GlobalStyles";
 import ingredientsData from '../data/ingredientsData.json';
+import EventBus from '../services/EventBus';
 
 type AddIngredientProps = {
   isVisible: boolean;
   onClose: () => void;
-  onAdd: (ingredient: {id: string, name: string, quantity: string, storageType: string}) => void;
 };
 
-const AddIngredient: React.FC<AddIngredientProps> = ({ isVisible, onClose, onAdd }) => {
+const AddIngredient: React.FC<AddIngredientProps> = ({ isVisible, onClose }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [quantity, setQuantity] = useState('');
   const [filteredIngredients, setFilteredIngredients] = useState(ingredientsData);
@@ -58,13 +58,13 @@ const AddIngredient: React.FC<AddIngredientProps> = ({ isVisible, onClose, onAdd
 
   const handleAdd = () => {
     if (selectedIngredient) {
-      onAdd({
+      EventBus.publish('ADD_INGREDIENT', {
         id: selectedIngredient.id,
-        name: selectedIngredient.name,
-        quantity,
-        storageType: selectedIngredient.storageType
+        quantity: parseInt(quantity),
+        unit: selectedIngredient.defaultUnit,
+        inStock: true
       });
-      onClose();
+      onClose();  // Close the modal after adding the ingredient
     }
   };
 

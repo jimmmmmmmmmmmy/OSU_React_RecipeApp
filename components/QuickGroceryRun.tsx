@@ -1,11 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import RecipeCard from './RecipeCard';
 import SectionHeader from './SectionHeader';
 import { FontFamily, FontSize, Color, Border } from "../GlobalStyles";
-import recipeData from '../data/recipeData.json';
 import images from '../data/images';
+import EventBus from '../services/EventBus';
 
 const MealTypeTab = ({ title, isSelected, onPress }) => (
   <TouchableOpacity 
@@ -19,17 +19,31 @@ const MealTypeTab = ({ title, isSelected, onPress }) => (
 const QuickGroceryRun = () => {
   const navigation = useNavigation();
   const [selectedTab, setSelectedTab] = useState('All');
+  const [sortedRecipes, setSortedRecipes] = useState([]);
 
   const mealTypes = ['All', 'Appetizer', 'Breakfast', 'Lunch', 'Dinner'];
 
+  useEffect(() => {
+    const handleSortedRecipes = (recipes) => {
+      setSortedRecipes(recipes);
+    };
+
+    EventBus.subscribe('RECIPE_RECOMMENDATIONS_READY', handleSortedRecipes);
+    EventBus.publish('GET_RECIPE_RECOMMENDATIONS', {});
+
+    return () => {
+      EventBus.unsubscribe('RECIPE_RECOMMENDATIONS_READY', handleSortedRecipes);
+    };
+  }, []);
+
   const filteredRecipes = useMemo(() => {
     if (selectedTab === 'All') {
-      return recipeData;
+      return sortedRecipes;
     }
-    return recipeData.filter(recipe => 
+    return sortedRecipes.filter(recipe => 
       recipe.category && recipe.category.includes(selectedTab)
     );
-  }, [selectedTab]);
+  }, [selectedTab, sortedRecipes]);
 
   const handleSeeAll = () => {
     navigation.navigate('RecipeCatalog', { source: 'QuickGroceryRun' });
@@ -39,7 +53,7 @@ const QuickGroceryRun = () => {
     navigation.navigate('RecipeDetails', { recipe });
   };
 
-  return (
+   return (
     <View style={styles.container}>
       <SectionHeader title="Quick grocery run:" onSeeAll={handleSeeAll} />
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabContainer}>
